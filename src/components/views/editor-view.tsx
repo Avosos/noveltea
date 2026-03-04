@@ -6,7 +6,7 @@ import {
   Info, Users, MapPin, Target, Hash, Clock,
 } from "lucide-react";
 import { useNovelTeaStore } from "@/stores/noveltea-store";
-import type { Scene, BaseEntity } from "@/types";
+import type { Scene, BaseEntity, CharacterEntity } from "@/types";
 
 export default function EditorView() {
   const {
@@ -399,7 +399,7 @@ function StoryContextPanel({
       {scene.pov && (
         <ContextSection title="POV Character" icon={<Users size={13} />}>
           {(() => {
-            const char = entities.find((c) => c.entityType === "character" && c.id === scene.pov);
+            const char = entities.find((c) => c.entityType === "character" && c.id === scene.pov) as CharacterEntity | undefined;
             if (!char) return <span style={{ fontSize: 12, color: "var(--text-dim)" }}>Unknown</span>;
             return (
               <div style={{ fontSize: 12, color: "var(--text-secondary)" }}>
