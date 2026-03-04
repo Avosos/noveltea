@@ -3,13 +3,15 @@
 import React, { useState } from "react";
 import { Plus, GripVertical, Trash2, ChevronDown, ChevronRight, Edit3, BookOpen } from "lucide-react";
 import { useNovelTeaStore } from "@/stores/noveltea-store";
+import { getTranslations } from "@/lib/i18n";
 import type { Chapter } from "@/types";
 
 export default function ChaptersView() {
   const {
     chapters, story, addChapter, deleteChapter, selectChapter, selectScene,
-    addScene, deleteScene, updateChapter, wordCount,
+    addScene, deleteScene, updateChapter, wordCount, settings,
   } = useNovelTeaStore();
+  const t = getTranslations(settings.language || "de");
 
   const [expandedChapters, setExpandedChapters] = useState<Record<string, boolean>>({});
   const [editingTitle, setEditingTitle] = useState<string | null>(null);
@@ -41,14 +43,14 @@ export default function ChaptersView() {
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 24 }}>
           <div>
             <h1 style={{ fontSize: 22, fontWeight: 800, color: "var(--text-primary)", marginBottom: 4 }}>
-              Chapters & Scenes
+              {t.chapters.title}
             </h1>
             <p style={{ fontSize: 13, color: "var(--text-muted)" }}>
               {chapters.length} chapters · {chapters.reduce((a, c) => a + c.scenes.length, 0)} scenes · {wordCount.total.toLocaleString()} words
             </p>
           </div>
           <button className="btn-primary" onClick={() => addChapter()} style={{ display: "flex", alignItems: "center", gap: 6 }}>
-            <Plus size={16} /> New Chapter
+            <Plus size={16} /> {t.chapters.newChapter}
           </button>
         </div>
 
@@ -125,7 +127,7 @@ export default function ChaptersView() {
 
                   <span style={{ fontSize: 11, color: "var(--text-dim)" }}>{ch.scenes.length} scene{ch.scenes.length !== 1 ? "s" : ""}</span>
                   <span style={{ fontSize: 11, color: "var(--text-dim)" }}>{chWords.toLocaleString()} words</span>
-                  <span className="badge" style={{ fontSize: 10 }}>Act {ch.act}</span>
+                  <span className="badge" style={{ fontSize: 10 }}>{t.chapters.act} {ch.act}</span>
 
                   <button
                     className="btn-ghost"
@@ -205,7 +207,7 @@ export default function ChaptersView() {
                       onMouseEnter={(e) => (e.currentTarget.style.color = "var(--accent)")}
                       onMouseLeave={(e) => (e.currentTarget.style.color = "var(--text-dim)")}
                     >
-                      <Plus size={10} /> Add Scene
+                      <Plus size={10} /> {t.chapters.addScene}
                     </button>
                   </div>
                 )}

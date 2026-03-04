@@ -3,7 +3,9 @@
 import React from "react";
 import { Save, RotateCcw } from "lucide-react";
 import { useNovelTeaStore } from "@/stores/noveltea-store";
+import { getTranslations, LANGUAGES } from "@/lib/i18n";
 import type { NovelTeaSettings } from "@/types";
+import type { Language } from "@/lib/i18n";
 
 const FONTS = [
   "Inter, system-ui, sans-serif",
@@ -14,16 +16,17 @@ const FONTS = [
   "'Lora', serif",
 ];
 
-const THEMES = [
-  { value: "dark" as const, label: "Dark", bg: "#08080d", fg: "#e4e4e7" },
-  { value: "grey" as const, label: "Grey", bg: "#1a1a2e", fg: "#e4e4e7" },
-  { value: "light" as const, label: "Light", bg: "#f5f5f5", fg: "#18181b" },
-];
-
 export default function SettingsView() {
   const { settings, updateSettings } = useNovelTeaStore();
+  const t = getTranslations(settings.language || "de");
 
   const update = (partial: Partial<NovelTeaSettings>) => updateSettings(partial);
+
+  const THEMES = [
+    { value: "dark" as const, label: t.settings.dark, bg: "#08080d", fg: "#e4e4e7" },
+    { value: "grey" as const, label: t.settings.grey, bg: "#1a1a2e", fg: "#e4e4e7" },
+    { value: "light" as const, label: t.settings.light, bg: "#f5f5f5", fg: "#18181b" },
+  ];
 
   const resetDefaults = () => {
     updateSettings({
@@ -36,6 +39,9 @@ export default function SettingsView() {
       typewriterMode: false,
       focusMode: false,
       spellcheck: true,
+      language: "de" as Language,
+      highlightDates: true,
+      highlightNames: true,
     });
   };
 
@@ -43,26 +49,41 @@ export default function SettingsView() {
     <div style={{ height: "100%", overflow: "auto", padding: 32 }}>
       <div style={{ maxWidth: 600, margin: "0 auto" }}>
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 28 }}>
-          <h1 style={{ fontSize: 22, fontWeight: 800, color: "var(--text-primary)" }}>Settings</h1>
+          <h1 style={{ fontSize: 22, fontWeight: 800, color: "var(--text-primary)" }}>{t.settings.title}</h1>
           <button className="btn-ghost" onClick={resetDefaults} style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 12 }}>
-            <RotateCcw size={13} /> Reset Defaults
+            <RotateCcw size={13} /> {t.settings.resetDefaults}
           </button>
         </div>
 
+        {/* Language */}
+        <Section title={t.settings.language}>
+          <label style={labelStyle}>{t.settings.languageDesc}</label>
+          <select
+            className="input"
+            style={{ width: "100%", marginBottom: 16 }}
+            value={settings.language || "de"}
+            onChange={(e) => update({ language: e.target.value as Language })}
+          >
+            {LANGUAGES.map((lang) => (
+              <option key={lang.value} value={lang.value}>{lang.label}</option>
+            ))}
+          </select>
+        </Section>
+
         {/* Theme */}
-        <Section title="Appearance">
-          <label style={labelStyle}>Theme</label>
+        <Section title={t.settings.appearance}>
+          <label style={labelStyle}>{t.settings.theme}</label>
           <div style={{ display: "flex", gap: 10, marginBottom: 16 }}>
-            {THEMES.map((t) => (
+            {THEMES.map((th) => (
               <div
-                key={t.value}
-                onClick={() => update({ theme: t.value })}
+                key={th.value}
+                onClick={() => update({ theme: th.value })}
                 style={{
                   flex: 1,
                   padding: "14px 16px",
-                  background: t.bg,
-                  color: t.fg,
-                  border: `2px solid ${settings.theme === t.value ? "var(--accent)" : "var(--border-subtle)"}`,
+                  background: th.bg,
+                  color: th.fg,
+                  border: `2px solid ${settings.theme === th.value ? "var(--accent)" : "var(--border-subtle)"}`,
                   borderRadius: "var(--radius-sm)",
                   cursor: "pointer",
                   textAlign: "center",
@@ -71,15 +92,15 @@ export default function SettingsView() {
                   transition: "border-color 0.15s",
                 }}
               >
-                {t.label}
+                {th.label}
               </div>
             ))}
           </div>
         </Section>
 
         {/* Editor settings */}
-        <Section title="Editor">
-          <label style={labelStyle}>Font Family</label>
+        <Section title={t.settings.editorSection}>
+          <label style={labelStyle}>{t.settings.fontFamily}</label>
           <select
             className="input"
             style={{ width: "100%", marginBottom: 16 }}
@@ -93,7 +114,7 @@ export default function SettingsView() {
 
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16, marginBottom: 16 }}>
             <div>
-              <label style={labelStyle}>Font Size</label>
+              <label style={labelStyle}>{t.settings.fontSize}</label>
               <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
                 <input
                   type="range"
@@ -110,7 +131,7 @@ export default function SettingsView() {
               </div>
             </div>
             <div>
-              <label style={labelStyle}>Line Height</label>
+              <label style={labelStyle}>{t.settings.lineHeight}</label>
               <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
                 <input
                   type="range"
@@ -146,48 +167,48 @@ export default function SettingsView() {
         </Section>
 
         {/* Writing preferences */}
-        <Section title="Writing">
+        <Section title={t.settings.writing}>
           <ToggleSetting
-            label="Show Word Count"
-            description="Display word count in the titlebar"
+            label={t.settings.showWordCount}
+            description={t.settings.showWordCountDesc}
             value={settings.showWordCount}
             onChange={(v) => update({ showWordCount: v })}
           />
           <ToggleSetting
-            label="Typewriter Mode"
-            description="Keep the cursor centered vertically"
+            label={t.settings.typewriterMode}
+            description={t.settings.typewriterModeDesc}
             value={settings.typewriterMode}
             onChange={(v) => update({ typewriterMode: v })}
           />
           <ToggleSetting
-            label="Focus Mode"
-            description="Dim everything except the current paragraph"
+            label={t.settings.focusMode}
+            description={t.settings.focusModeDesc}
             value={settings.focusMode}
             onChange={(v) => update({ focusMode: v })}
           />
           <ToggleSetting
-            label="Spellcheck"
-            description="Enable browser spell checking"
+            label={t.settings.spellcheck}
+            description={t.settings.spellcheckDesc}
             value={settings.spellcheck}
             onChange={(v) => update({ spellcheck: v })}
           />
         </Section>
 
         {/* Autosave */}
-        <Section title="Autosave">
-          <label style={labelStyle}>Autosave Interval</label>
+        <Section title={t.settings.autosave}>
+          <label style={labelStyle}>{t.settings.autosaveInterval}</label>
           <select
             className="input"
             style={{ width: "100%" }}
             value={settings.autosaveInterval}
             onChange={(e) => update({ autosaveInterval: Number(e.target.value) })}
           >
-            <option value={10000}>10 seconds</option>
-            <option value={30000}>30 seconds</option>
-            <option value={60000}>1 minute</option>
-            <option value={120000}>2 minutes</option>
-            <option value={300000}>5 minutes</option>
-            <option value={0}>Disabled</option>
+            <option value={10000}>{t.settings.seconds10}</option>
+            <option value={30000}>{t.settings.seconds30}</option>
+            <option value={60000}>{t.settings.minute1}</option>
+            <option value={120000}>{t.settings.minutes2}</option>
+            <option value={300000}>{t.settings.minutes5}</option>
+            <option value={0}>{t.settings.disabled}</option>
           </select>
         </Section>
       </div>

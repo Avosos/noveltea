@@ -3,9 +3,11 @@
 import React, { useMemo } from "react";
 import { BarChart3, BookOpen, Users, FileText, Pen } from "lucide-react";
 import { useNovelTeaStore } from "@/stores/noveltea-store";
+import { getTranslations } from "@/lib/i18n";
 
 export default function StatsView() {
-  const { chapters, entities, wordCount, story } = useNovelTeaStore();
+  const { chapters, entities, wordCount, story, settings } = useNovelTeaStore();
+  const t = getTranslations(settings.language || "de");
 
   const stats = useMemo(() => {
     const totalScenes = chapters.reduce((a, c) => a + c.scenes.length, 0);
@@ -72,19 +74,19 @@ export default function StatsView() {
   return (
     <div style={{ height: "100%", overflow: "auto", padding: 32 }}>
       <div style={{ maxWidth: 900, margin: "0 auto" }}>
-        <h1 style={{ fontSize: 22, fontWeight: 800, color: "var(--text-primary)", marginBottom: 24 }}>Statistics</h1>
+        <h1 style={{ fontSize: 22, fontWeight: 800, color: "var(--text-primary)", marginBottom: 24 }}>{t.stats.title}</h1>
 
         {/* Summary cards */}
         <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 12, marginBottom: 32 }}>
-          <StatCard icon={<Pen size={18} />} label="Total Words" value={wordCount.total.toLocaleString()} />
-          <StatCard icon={<BookOpen size={18} />} label="Chapters" value={String(chapters.length)} sub={`${stats.totalScenes} scenes`} />
-          <StatCard icon={<Users size={18} />} label="Entities" value={String(entities.length)} sub={`${stats.entityCounts["character"] || 0} characters`} />
-          <StatCard icon={<BarChart3 size={18} />} label="Avg Tension" value={stats.avgTension.toFixed(1)} sub="out of 10" />
+          <StatCard icon={<Pen size={18} />} label={t.stats.totalWords} value={wordCount.total.toLocaleString()} />
+          <StatCard icon={<BookOpen size={18} />} label={t.stats.chaptersLabel} value={String(chapters.length)} sub={`${stats.totalScenes} ${t.chapters.scenes}`} />
+          <StatCard icon={<Users size={18} />} label={t.stats.entitiesLabel} value={String(entities.length)} sub={`${stats.entityCounts["character"] || 0} ${t.sidebar.characters}`} />
+          <StatCard icon={<BarChart3 size={18} />} label={t.stats.avgTension} value={stats.avgTension.toFixed(1)} sub={t.stats.outOf10} />
         </div>
 
         {/* Words per chapter bar chart */}
         <div style={{ marginBottom: 32 }}>
-          <h2 style={{ fontSize: 15, fontWeight: 700, color: "var(--text-primary)", marginBottom: 16 }}>Words per Chapter</h2>
+          <h2 style={{ fontSize: 15, fontWeight: 700, color: "var(--text-primary)", marginBottom: 16 }}>{t.stats.wordsPerChapter}</h2>
           <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
             {stats.chapterStats.map((ch) => {
               const pct = (ch.words / maxChapterWords) * 100;
@@ -113,14 +115,14 @@ export default function StatsView() {
             })}
           </div>
           <p style={{ fontSize: 11, color: "var(--text-dim)", marginTop: 8 }}>
-            Average: {stats.avgChapterWords.toLocaleString()} words/chapter
+            {t.stats.average}: {stats.avgChapterWords.toLocaleString()} {t.stats.wordsChapter}
           </p>
         </div>
 
         {/* POV distribution & Character screentime side by side */}
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 24, marginBottom: 32 }}>
           <div>
-            <h2 style={{ fontSize: 15, fontWeight: 700, color: "var(--text-primary)", marginBottom: 16 }}>POV Distribution</h2>
+            <h2 style={{ fontSize: 15, fontWeight: 700, color: "var(--text-primary)", marginBottom: 16 }}>{t.stats.povDistribution}</h2>
             {Object.keys(stats.povCounts).length > 0 ? (
               <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
                 {Object.entries(stats.povCounts)
@@ -144,12 +146,12 @@ export default function StatsView() {
                   })}
               </div>
             ) : (
-              <p style={{ fontSize: 12, color: "var(--text-dim)" }}>No POV data yet.</p>
+              <p style={{ fontSize: 12, color: "var(--text-dim)" }}>{t.stats.noPovData}</p>
             )}
           </div>
 
           <div>
-            <h2 style={{ fontSize: 15, fontWeight: 700, color: "var(--text-primary)", marginBottom: 16 }}>Character Screentime</h2>
+            <h2 style={{ fontSize: 15, fontWeight: 700, color: "var(--text-primary)", marginBottom: 16 }}>{t.stats.characterScreentime}</h2>
             {Object.keys(stats.characterScreentime).length > 0 ? (
               <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
                 {Object.entries(stats.characterScreentime)
@@ -174,20 +176,20 @@ export default function StatsView() {
                   })}
               </div>
             ) : (
-              <p style={{ fontSize: 12, color: "var(--text-dim)" }}>No character appearances tracked.</p>
+              <p style={{ fontSize: 12, color: "var(--text-dim)" }}>{t.stats.noScreentime}</p>
             )}
           </div>
         </div>
 
         {/* Conflict summary */}
         <div>
-          <h2 style={{ fontSize: 15, fontWeight: 700, color: "var(--text-primary)", marginBottom: 12 }}>Conflict Tracking</h2>
+          <h2 style={{ fontSize: 15, fontWeight: 700, color: "var(--text-primary)", marginBottom: 12 }}>{t.stats.conflictTracking}</h2>
           <div style={{ display: "flex", gap: 16 }}>
             <span style={{ fontSize: 13, color: "var(--text-muted)" }}>
-              Total: <strong style={{ color: "var(--text-primary)" }}>{stats.totalConflicts}</strong>
+              {t.stats.total}: <strong style={{ color: "var(--text-primary)" }}>{stats.totalConflicts}</strong>
             </span>
-            <span style={{ fontSize: 13, color: "#f59e0b" }}>Active: {stats.activeConflicts}</span>
-            <span style={{ fontSize: 13, color: "#60a5fa" }}>Planted: {stats.plantedConflicts}</span>
+            <span style={{ fontSize: 13, color: "#f59e0b" }}>{t.stats.active}: {stats.activeConflicts}</span>
+            <span style={{ fontSize: 13, color: "#60a5fa" }}>{t.stats.planted}: {stats.plantedConflicts}</span>
           </div>
         </div>
       </div>

@@ -182,7 +182,7 @@ export default function EditorView() {
             onMouseEnter={(e) => (e.currentTarget.style.color = "var(--accent)")}
             onMouseLeave={(e) => (e.currentTarget.style.color = "var(--text-dim)")}
           >
-            + Add Scene
+            + {t.editor.addScene.replace("+ ", "")}
           </button>
         </div>
       )}
@@ -203,16 +203,16 @@ export default function EditorView() {
             <span style={{ fontSize: 13, fontWeight: 600, color: "var(--text-primary)" }}>
               {activeScene.title}
             </span>
-            <span className="badge">{sceneWords} words</span>
+            <span className="badge">{sceneWords} {t.editor.words}</span>
           </div>
           <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
-            <ToolbarButton onClick={saveContent} title="Save (Ctrl+S)">
+            <ToolbarButton onClick={saveContent} title={t.editor.save}>
               <Save size={14} />
             </ToolbarButton>
-            <ToolbarButton onClick={toggleFocusMode} title="Focus mode">
+            <ToolbarButton onClick={toggleFocusMode} title={t.editor.focusMode}>
               {focusMode ? <Minimize2 size={14} /> : <Maximize2 size={14} />}
             </ToolbarButton>
-            <ToolbarButton onClick={toggleContextPanel} title="Story context">
+            <ToolbarButton onClick={toggleContextPanel} title={t.editor.storyContext}>
               {contextPanelOpen ? <EyeOff size={14} /> : <Eye size={14} />}
             </ToolbarButton>
           </div>
@@ -230,7 +230,9 @@ export default function EditorView() {
             className="novel-editor"
             value={localContent}
             onChange={(e) => setLocalContent(e.target.value)}
-            placeholder="Begin writing your scene…"
+            onSelect={handleTextSelect}
+            onContextMenu={handleContextMenu}
+            placeholder={t.editor.beginWriting}
             style={{
               width: "100%",
               minHeight: "100%",
@@ -243,6 +245,48 @@ export default function EditorView() {
             spellCheck={settings.spellcheck}
           />
         </div>
+
+        {/* Dialogue context menu */}
+        {showDialogueMenu && (
+          <>
+            <div style={{ position: "fixed", inset: 0, zIndex: 99 }} onClick={() => setShowDialogueMenu(false)} />
+            <div style={{
+              position: "fixed", left: dialogueMenuPos.x, top: dialogueMenuPos.y, zIndex: 100,
+              background: "var(--bg-secondary)", border: "1px solid var(--border)", borderRadius: "var(--radius-md)",
+              padding: 8, minWidth: 220, boxShadow: "var(--shadow-lg)",
+            }}>
+              <div style={{ fontSize: 11, fontWeight: 600, color: "var(--text-dim)", padding: "4px 8px", marginBottom: 4 }}>
+                <MessageSquare size={12} style={{ display: "inline", marginRight: 4 }} />
+                {t.dialogue.title}
+              </div>
+              {characters.map((c) => (
+                <div key={c.id} style={{ display: "flex", gap: 4, padding: "2px 4px" }}>
+                  <button
+                    className="btn-ghost"
+                    style={{ flex: 1, justifyContent: "flex-start", fontSize: 12, padding: "4px 8px" }}
+                    onClick={() => markAsDialogue(c.id, "speech")}
+                  >
+                    <span style={{ width: 6, height: 6, borderRadius: "50%", background: (c as CharacterEntity).dialogueColor || "#60a5fa", display: "inline-block", marginRight: 6 }} />
+                    {c.name} — {t.editor.markAsSpeech}
+                  </button>
+                  <button
+                    className="btn-ghost"
+                    style={{ fontSize: 11, padding: "4px 6px", color: "var(--text-dim)" }}
+                    onClick={() => markAsDialogue(c.id, "mention")}
+                    title={t.editor.markAsMention}
+                  >
+                    @
+                  </button>
+                </div>
+              ))}
+              {characters.length === 0 && (
+                <div style={{ padding: "8px", fontSize: 11, color: "var(--text-dim)" }}>
+                  {t.dialogue.noAttributions}
+                </div>
+              )}
+            </div>
+          </>
+        )}
       </div>
 
       {/* Story Context Panel */}
@@ -259,7 +303,8 @@ export default function EditorView() {
 
 /* ─── Scene Metadata Bar ─── */
 function SceneMetadataBar({ scene, chapterId }: { scene: Scene; chapterId: string }) {
-  const { updateScene, entities } = useNovelTeaStore();
+  const { updateScene, entities, settings } = useNovelTeaStore();
+  const t = getTranslations(settings.language || "de");
   const characters = entities.filter((e) => e.entityType === "character");
   const locations = entities.filter((e) => e.entityType === "location");
 
@@ -277,28 +322,28 @@ function SceneMetadataBar({ scene, chapterId }: { scene: Scene; chapterId: strin
     }}>
       <MetaField
         icon={<Users size={12} />}
-        label="POV"
+        label={t.editor.pov}
         value={characters.find((c) => c.id === scene.pov)?.name || "—"}
         options={characters.map((c) => ({ value: c.id, label: c.name }))}
         onChange={(val) => updateScene(chapterId, { ...scene, pov: val || null })}
       />
       <MetaField
         icon={<MapPin size={12} />}
-        label="Location"
+        label={t.editor.location}
         value={locations.find((l) => l.id === scene.location)?.name || "—"}
         options={locations.map((l) => ({ value: l.id, label: l.name }))}
         onChange={(val) => updateScene(chapterId, { ...scene, location: val || null })}
       />
       <MetaField
         icon={<Clock size={12} />}
-        label="Timeline"
+        label={t.editor.timelineLabel}
         value={scene.timeline || "—"}
         editable
         onChange={(val) => updateScene(chapterId, { ...scene, timeline: val || null })}
       />
       <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
         <Target size={12} style={{ color: "var(--text-dim)" }} />
-        <span style={{ color: "var(--text-dim)" }}>Tension:</span>
+        <span style={{ color: "var(--text-dim)" }}>{t.editor.tension}:</span>
         <input
           type="range"
           min="0"
@@ -395,7 +440,8 @@ function StoryContextPanel({
   mentionedEntities: BaseEntity[];
   onSelectEntity: (id: string) => void;
 }) {
-  const { entities, chapters, story } = useNovelTeaStore();
+  const { entities, chapters, story, settings } = useNovelTeaStore();
+  const t = getTranslations(settings.language || "de");
 
   // Active conflicts
   const activeConflicts = story?.conflicts.filter((c) => c.status !== "resolved") || [];
@@ -413,12 +459,12 @@ function StoryContextPanel({
       }}
     >
       <div style={{ fontSize: 12, fontWeight: 700, color: "var(--text-dim)", textTransform: "uppercase", letterSpacing: 1, marginBottom: 16 }}>
-        Story Context
+        {t.editor.storyContext}
       </div>
 
       {/* Referenced Entities */}
       {mentionedEntities.length > 0 && (
-        <ContextSection title="Referenced Entities" icon={<Users size={13} />}>
+        <ContextSection title={t.editor.referencedEntities} icon={<Users size={13} />}>
           {mentionedEntities.map((e) => (
             <button
               key={e.id}
@@ -450,7 +496,7 @@ function StoryContextPanel({
 
       {/* POV Character details */}
       {scene.pov && (
-        <ContextSection title="POV Character" icon={<Users size={13} />}>
+        <ContextSection title={t.editor.povCharacter} icon={<Users size={13} />}>
           {(() => {
             const char = entities.find((c) => c.entityType === "character" && c.id === scene.pov) as CharacterEntity | undefined;
             if (!char) return <span style={{ fontSize: 12, color: "var(--text-dim)" }}>Unknown</span>;
@@ -467,7 +513,7 @@ function StoryContextPanel({
 
       {/* Location */}
       {scene.location && (
-        <ContextSection title="Location" icon={<MapPin size={13} />}>
+        <ContextSection title={t.editor.location} icon={<MapPin size={13} />}>
           {(() => {
             const loc = entities.find((l) => l.entityType === "location" && l.id === scene.location);
             if (!loc) return null;
@@ -483,7 +529,7 @@ function StoryContextPanel({
 
       {/* Active Conflicts */}
       {activeConflicts.length > 0 && (
-        <ContextSection title="Open Conflicts" icon={<Target size={13} />}>
+        <ContextSection title={t.editor.openConflicts} icon={<Target size={13} />}>
           {activeConflicts.slice(0, 5).map((c) => (
             <div key={c.id} style={{ padding: "4px 0", fontSize: 12 }}>
               <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
@@ -502,7 +548,7 @@ function StoryContextPanel({
       )}
 
       {/* Scene tension visualization */}
-      <ContextSection title="Tension Curve" icon={<Hash size={13} />}>
+      <ContextSection title={t.editor.tensionCurve} icon={<Hash size={13} />}>
         <div style={{ display: "flex", alignItems: "end", gap: 2, height: 40, padding: "4px 0" }}>
           {chapters.flatMap((ch) => ch.scenes).map((s, i) => (
             <div
