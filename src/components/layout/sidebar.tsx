@@ -5,34 +5,11 @@ import {
   BookOpen, PenTool, Users, MapPin, Search, Settings, BarChart3,
   Plus, FolderOpen, ChevronDown, ChevronRight, Layers, Target,
   AlertTriangle, Clock, Building2, Gem, ScrollText, Home,
+  Share2, BookMarked, MessageSquare,
 } from "lucide-react";
 import { useNovelTeaStore } from "@/stores/noveltea-store";
+import { getTranslations } from "@/lib/i18n";
 import type { AppView, EntityType } from "@/types";
-
-interface NavItem {
-  id: AppView;
-  label: string;
-  icon: React.ReactNode;
-}
-
-const NAV_ITEMS: NavItem[] = [
-  { id: "editor", label: "Editor", icon: <PenTool size={16} /> },
-  { id: "chapters", label: "Chapters", icon: <BookOpen size={16} /> },
-  { id: "timeline", label: "Timeline", icon: <Clock size={16} /> },
-  { id: "story-map", label: "Story Map", icon: <Layers size={16} /> },
-  { id: "conflicts", label: "Conflicts", icon: <Target size={16} /> },
-  { id: "search", label: "Search", icon: <Search size={16} /> },
-  { id: "stats", label: "Statistics", icon: <BarChart3 size={16} /> },
-  { id: "settings", label: "Settings", icon: <Settings size={16} /> },
-];
-
-const ENTITY_SECTIONS: { type: EntityType; label: string; icon: React.ReactNode }[] = [
-  { type: "character", label: "Characters", icon: <Users size={14} /> },
-  { type: "location", label: "Locations", icon: <MapPin size={14} /> },
-  { type: "organization", label: "Organizations", icon: <Building2 size={14} /> },
-  { type: "artifact", label: "Artifacts", icon: <Gem size={14} /> },
-  { type: "lore", label: "Lore", icon: <ScrollText size={14} /> },
-];
 
 export default function Sidebar() {
   const currentView = useNovelTeaStore((s) => s.currentView);
@@ -42,6 +19,30 @@ export default function Sidebar() {
   const addEntity = useNovelTeaStore((s) => s.addEntity);
   const selectEntity = useNovelTeaStore((s) => s.selectEntity);
   const closeProject = useNovelTeaStore((s) => s.closeProject);
+  const settings = useNovelTeaStore((s) => s.settings);
+  const t = getTranslations(settings.language || "de");
+
+  const NAV_ITEMS: { id: AppView; label: string; icon: React.ReactNode }[] = [
+    { id: "editor", label: t.nav.editor, icon: <PenTool size={16} /> },
+    { id: "chapters", label: t.nav.chapters, icon: <BookOpen size={16} /> },
+    { id: "timeline", label: t.nav.timeline, icon: <Clock size={16} /> },
+    { id: "story-map", label: t.nav.storyMap, icon: <Layers size={16} /> },
+    { id: "graph", label: t.nav.graph, icon: <Share2 size={16} /> },
+    { id: "conflicts", label: t.nav.conflicts, icon: <Target size={16} /> },
+    { id: "dialogue", label: t.nav.dialogue, icon: <MessageSquare size={16} /> },
+    { id: "sources", label: t.nav.sources, icon: <BookMarked size={16} /> },
+    { id: "search", label: t.nav.search, icon: <Search size={16} /> },
+    { id: "stats", label: t.nav.statistics, icon: <BarChart3 size={16} /> },
+    { id: "settings", label: t.nav.settings, icon: <Settings size={16} /> },
+  ];
+
+  const ENTITY_SECTIONS: { type: EntityType; label: string; icon: React.ReactNode; addLabel: string }[] = [
+    { type: "character", label: t.sidebar.characters, icon: <Users size={14} />, addLabel: t.sidebar.addCharacter },
+    { type: "location", label: t.sidebar.locations, icon: <MapPin size={14} />, addLabel: t.sidebar.addLocation },
+    { type: "organization", label: t.sidebar.organizations, icon: <Building2 size={14} />, addLabel: t.sidebar.addOrganization },
+    { type: "artifact", label: t.sidebar.artifacts, icon: <Gem size={14} />, addLabel: t.sidebar.addArtifact },
+    { type: "lore", label: t.sidebar.lore, icon: <ScrollText size={14} />, addLabel: t.sidebar.addLore },
+  ];
 
   const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({
     character: true,
@@ -73,7 +74,7 @@ export default function Sidebar() {
       {/* Navigation */}
       <nav style={{ padding: "12px 8px", flexShrink: 0 }}>
         <div style={{ fontSize: 10, fontWeight: 600, color: "var(--text-dim)", textTransform: "uppercase", letterSpacing: 1.2, padding: "4px 10px", marginBottom: 4 }}>
-          Navigation
+          {t.sidebar.navigation}
         </div>
         {NAV_ITEMS.map((item) => (
           <SidebarButton
@@ -91,9 +92,9 @@ export default function Sidebar() {
       {/* Worldbuilding Entities */}
       <div style={{ flex: 1, overflow: "auto", padding: "12px 8px" }}>
         <div style={{ fontSize: 10, fontWeight: 600, color: "var(--text-dim)", textTransform: "uppercase", letterSpacing: 1.2, padding: "4px 10px", marginBottom: 4 }}>
-          Worldbuilding
+          {t.sidebar.worldbuilding}
         </div>
-        {ENTITY_SECTIONS.map(({ type, label, icon }) => (
+        {ENTITY_SECTIONS.map(({ type, label, icon, addLabel }) => (
           <div key={type} style={{ marginBottom: 2 }}>
             <button
               onClick={() => toggleSection(type)}
@@ -180,7 +181,7 @@ export default function Sidebar() {
                   }}
                 >
                   <Plus size={10} />
-                  Add {label.slice(0, -1)}
+                  {addLabel}
                 </button>
               </div>
             )}
@@ -192,7 +193,7 @@ export default function Sidebar() {
       <div style={{ padding: "8px", borderTop: "1px solid var(--border-subtle)", flexShrink: 0 }}>
         <SidebarButton
           icon={<Home size={16} />}
-          label="Close Project"
+          label={t.sidebar.closeProject}
           active={false}
           onClick={closeProject}
         />

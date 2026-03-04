@@ -3,7 +3,9 @@ import type {
   AppView, Project, StoryMeta, Chapter, Scene, Entity, EntityType,
   NovelTeaSettings, SearchResult, Snapshot, Conflict, Plotline,
   CharacterEntity, LocationEntity, BaseEntity,
+  Source, Footnote, DialogueAttribution,
 } from "@/types";
+import type { Language } from "@/lib/i18n";
 import { v4 as uuid } from "uuid";
 
 /* ══════════════════════════════════════════════════════════════════════════════
@@ -42,7 +44,12 @@ interface NovelTeaState {
 
   // ─── Snapshots ──────────────────────────────────────────
   snapshots: Snapshot[];
+  // ─── Sources & Footnotes ───────────────────────────────
+  sources: Source[];
+  footnotes: Footnote[];
 
+  // ─── Dialogue Attributions ─────────────────────────────
+  dialogueAttributions: DialogueAttribution[];
   // ─── Actions ────────────────────────────────────────────
   init: () => Promise<void>;
   createProject: (name: string) => Promise<void>;
@@ -81,6 +88,19 @@ interface NovelTeaState {
   createSnapshot: (label?: string) => Promise<void>;
   loadSnapshots: () => Promise<void>;
 
+  // Sources & Footnotes
+  addSource: (source: Omit<Source, "id" | "createdAt">) => void;
+  updateSource: (source: Source) => void;
+  deleteSource: (sourceId: string) => void;
+  addFootnote: (footnote: Omit<Footnote, "id" | "createdAt">) => void;
+  updateFootnote: (footnote: Footnote) => void;
+  deleteFootnote: (footnoteId: string) => void;
+
+  // Dialogue Attributions
+  addDialogueAttribution: (attr: Omit<DialogueAttribution, "id" | "createdAt">) => void;
+  deleteDialogueAttribution: (attrId: string) => void;
+  getCharacterDialogue: (characterId: string) => DialogueAttribution[];
+
   // Utilities
   refreshWordCount: () => Promise<void>;
   toggleFocusMode: () => void;
@@ -104,6 +124,9 @@ const DEFAULT_SETTINGS: NovelTeaSettings = {
   typewriterMode: false,
   focusMode: false,
   spellcheck: true,
+  language: "de" as Language,
+  highlightDates: true,
+  highlightNames: true,
 };
 
 export const useNovelTeaStore = create<NovelTeaState>((set, get) => ({
@@ -126,6 +149,9 @@ export const useNovelTeaStore = create<NovelTeaState>((set, get) => ({
   searchResults: [],
   wordCount: { total: 0, byChapter: {} },
   snapshots: [],
+  sources: [],
+  footnotes: [],
+  dialogueAttributions: [],
 
   // ─── Actions ────────────────────────────────────────────
   init: async () => {
@@ -198,6 +224,9 @@ export const useNovelTeaStore = create<NovelTeaState>((set, get) => ({
     selectedEntityId: null,
     currentView: "welcome",
     unsavedChanges: false,
+    sources: [],
+    footnotes: [],
+    dialogueAttributions: [],
   }),
 
   // ── Chapter ─────────────────────────────────────────────
@@ -482,6 +511,50 @@ export const useNovelTeaStore = create<NovelTeaState>((set, get) => ({
       await window.electronAPI?.saveChapter(projectPath, ch);
       set({ unsavedChanges: false });
     }
+  },
+
+  // ── Sources & Footnotes ─────────────────────────────────
+  addSource: (sourceData) => {
+    const source: Source = { ...sourceData, id: uuid(), createdAt: Date.now() };
+    set({ sources: [...get().sources, source] });
+  },
+
+  updateSource: (source) => {
+    set({ sources: get().sources.map((s) => s.id === source.id ? source : s) });
+  },
+
+  deleteSource: (sourceId) => {
+    set({
+      sources: get().sources.filter((s) => s.id !== sourceId),
+      footnotes: get().footnotes.filter((f) => f.sourceId !== sourceId),
+    });
+  },
+
+  addFootnote: (footnoteData) => {
+    const footnote: Footnote = { ...footnoteData, id: uuid(), createdAt: Date.now() };
+    set({ footnotes: [...get().footnotes, footnote] });
+  },
+
+  updateFootnote: (footnote) => {
+    set({ footnotes: get().footnotes.map((f) => f.id === footnote.id ? footnote : f) });
+  },
+
+  deleteFootnote: (footnoteId) => {
+    set({ footnotes: get().footnotes.filter((f) => f.id !== footnoteId) });
+  },
+
+  // ── Dialogue Attributions ───────────────────────────────
+  addDialogueAttribution: (attrData) => {
+    const attr: DialogueAttribution = { ...attrData, id: uuid(), createdAt: Date.now() };
+    set({ dialogueAttributions: [...get().dialogueAttributions, attr] });
+  },
+
+  deleteDialogueAttribution: (attrId) => {
+    set({ dialogueAttributions: get().dialogueAttributions.filter((a) => a.id !== attrId) });
+  },
+
+  getCharacterDialogue: (characterId) => {
+    return get().dialogueAttributions.filter((a) => a.characterId === characterId);
   },
 
   // ── Getters ─────────────────────────────────────────────

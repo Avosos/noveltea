@@ -79,18 +79,25 @@ function NovelTeaLogo({ size = 20 }: { size?: number }) {
     <svg width={size} height={size} viewBox="0 0 256 256" style={{ borderRadius: size * 0.19, flexShrink: 0 }}>
       <defs>
         <linearGradient id="nt-tb-bg" x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" stopColor="#a3e635" />
-          <stop offset="100%" stopColor="#4ade80" />
+          <stop offset="0%" stopColor="#22c55e" />
+          <stop offset="100%" stopColor="#16a34a" />
         </linearGradient>
       </defs>
       <rect width="256" height="256" rx="48" fill="url(#nt-tb-bg)" />
-      <g transform="translate(128,128)" fill="none" stroke="#08080d" strokeWidth="10" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M -40 -50 L -40 50" />
-        <path d="M -40 -50 L 10 50" />
-        <path d="M 10 -50 L 10 50" />
-        <path d="M 30 -20 Q 30 -50, 50 -50 Q 70 -50, 70 -20" />
-        <path d="M 30 -20 L 30 50" />
-        <line x1="-55" y1="60" x2="80" y2="60" strokeWidth="6" opacity="0.4" />
+      {/* Minimalist fountain pen / feather quill */}
+      <g transform="translate(128,128)" fill="none" stroke="#fff" strokeWidth="8" strokeLinecap="round" strokeLinejoin="round">
+        {/* Quill body - diagonal line */}
+        <line x1="-50" y1="50" x2="50" y2="-60" strokeWidth="10" />
+        {/* Nib / pen tip */}
+        <path d="M -50 50 L -60 65 L -45 55" fill="#fff" stroke="#fff" strokeWidth="4" />
+        {/* Feather barbs left */}
+        <path d="M -20 20 Q -55 5, -65 -30" strokeWidth="6" opacity="0.7" />
+        <path d="M 0 0 Q -40 -15, -55 -50" strokeWidth="6" opacity="0.5" />
+        {/* Feather barbs right */}
+        <path d="M 10 -10 Q 45 -5, 60 -35" strokeWidth="6" opacity="0.7" />
+        <path d="M 30 -30 Q 55 -30, 65 -55" strokeWidth="6" opacity="0.5" />
+        {/* Small ink dot */}
+        <circle cx="-55" cy="60" r="4" fill="#fff" opacity="0.6" stroke="none" />
       </g>
     </svg>
   );

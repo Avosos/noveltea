@@ -2,6 +2,7 @@
 
 import { useEffect } from "react";
 import { useNovelTeaStore } from "@/stores/noveltea-store";
+import { ToastProvider } from "@/components/ui/toast";
 import Titlebar from "./titlebar";
 import Sidebar from "./sidebar";
 import WelcomeView from "@/components/views/welcome-view";
@@ -15,6 +16,9 @@ import ConflictsView from "@/components/views/conflicts-view";
 import SearchView from "@/components/views/search-view";
 import StatsView from "@/components/views/stats-view";
 import SettingsView from "@/components/views/settings-view";
+import GraphView from "@/components/views/graph-view";
+import SourcesView from "@/components/views/sources-view";
+import DialogueView from "@/components/views/dialogue-view";
 
 export default function MainLayout() {
   const currentView = useNovelTeaStore((s) => s.currentView);
@@ -35,24 +39,29 @@ export default function MainLayout() {
   const isWelcome = !project;
 
   return (
-    <div style={{ height: "100vh", display: "flex", flexDirection: "column", overflow: "hidden" }}>
-      <Titlebar />
-      <div style={{ flex: 1, display: "flex", overflow: "hidden" }}>
-        {!isWelcome && <Sidebar />}
-        <main style={{ flex: 1, overflow: "auto", background: "var(--bg-primary)" }}>
-          {isWelcome && <WelcomeView />}
-          {!isWelcome && currentView === "editor" && <EditorView />}
-          {!isWelcome && currentView === "chapters" && <ChaptersView />}
-          {!isWelcome && currentView === "entities" && <EntitiesView />}
-          {!isWelcome && currentView === "entity-detail" && <EntityDetailView />}
-          {!isWelcome && currentView === "story-map" && <StoryMapView />}
-          {!isWelcome && currentView === "timeline" && <TimelineView />}
-          {!isWelcome && currentView === "conflicts" && <ConflictsView />}
-          {!isWelcome && currentView === "search" && <SearchView />}
-          {!isWelcome && currentView === "stats" && <StatsView />}
-          {!isWelcome && currentView === "settings" && <SettingsView />}
-        </main>
+    <ToastProvider>
+      <div style={{ height: "100vh", display: "flex", flexDirection: "column", overflow: "hidden" }}>
+        <Titlebar />
+        <div style={{ flex: 1, display: "flex", overflow: "hidden" }}>
+          {!isWelcome && <Sidebar />}
+          <main style={{ flex: 1, overflow: "auto", background: "var(--bg-primary)" }}>
+            {isWelcome && <WelcomeView />}
+            {!isWelcome && currentView === "editor" && <EditorView />}
+            {!isWelcome && currentView === "chapters" && <ChaptersView />}
+            {!isWelcome && currentView === "entities" && <EntitiesView />}
+            {!isWelcome && currentView === "entity-detail" && <EntityDetailView />}
+            {!isWelcome && currentView === "story-map" && <StoryMapView />}
+            {!isWelcome && currentView === "timeline" && <TimelineView />}
+            {!isWelcome && currentView === "conflicts" && <ConflictsView />}
+            {!isWelcome && currentView === "search" && <SearchView />}
+            {!isWelcome && currentView === "stats" && <StatsView />}
+            {!isWelcome && currentView === "settings" && <SettingsView />}
+            {!isWelcome && currentView === "graph" && <GraphView />}
+            {!isWelcome && currentView === "sources" && <SourcesView />}
+            {!isWelcome && currentView === "dialogue" && <DialogueView />}
+          </main>
+        </div>
       </div>
-    </div>
+    </ToastProvider>
   );
 }
