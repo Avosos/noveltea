@@ -27,10 +27,10 @@ const NAV_ITEMS: NavItem[] = [
 ];
 
 const ENTITY_SECTIONS: { type: EntityType; label: string; icon: React.ReactNode }[] = [
-  { type: "characters", label: "Characters", icon: <Users size={14} /> },
-  { type: "locations", label: "Locations", icon: <MapPin size={14} /> },
-  { type: "organizations", label: "Organizations", icon: <Building2 size={14} /> },
-  { type: "artifacts", label: "Artifacts", icon: <Gem size={14} /> },
+  { type: "character", label: "Characters", icon: <Users size={14} /> },
+  { type: "location", label: "Locations", icon: <MapPin size={14} /> },
+  { type: "organization", label: "Organizations", icon: <Building2 size={14} /> },
+  { type: "artifact", label: "Artifacts", icon: <Gem size={14} /> },
   { type: "lore", label: "Lore", icon: <ScrollText size={14} /> },
 ];
 
@@ -44,10 +44,10 @@ export default function Sidebar() {
   const closeProject = useNovelTeaStore((s) => s.closeProject);
 
   const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({
-    characters: true,
-    locations: true,
-    organizations: false,
-    artifacts: false,
+    character: true,
+    location: true,
+    organization: false,
+    artifact: false,
     lore: false,
   });
 
@@ -119,15 +119,15 @@ export default function Sidebar() {
               {icon}
               <span style={{ flex: 1, textAlign: "left" }}>{label}</span>
               <span style={{ fontSize: 11, color: "var(--text-dim)" }}>
-                {entities[type]?.length || 0}
+                {entities.filter((e) => e.entityType === type).length}
               </span>
             </button>
             {expandedSections[type] && (
               <div style={{ paddingLeft: 20, marginTop: 2 }}>
-                {(entities[type] || []).map((entity) => (
+                {entities.filter((e) => e.entityType === type).map((entity) => (
                   <button
                     key={entity.id}
-                    onClick={() => selectEntity(type, entity.id)}
+                    onClick={() => selectEntity(entity.id)}
                     style={{
                       display: "block",
                       width: "100%",
@@ -157,10 +157,7 @@ export default function Sidebar() {
                   </button>
                 ))}
                 <button
-                  onClick={() => {
-                    const name = prompt(`New ${label.slice(0, -1)} name:`);
-                    if (name) addEntity(type, name);
-                  }}
+                  onClick={() => addEntity(type)}
                   style={{
                     display: "flex",
                     alignItems: "center",
