@@ -1,0 +1,63 @@
+{
+  "name": "noveltea",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Structured authoring environment for novels and narrative worlds — part of the Avosos ecosystem",
+  "author": "Avosos",
+  "main": "electron/main.js",
+  "scripts": {
+    "dev": "concurrently -k \"next dev --port 3300\" \"wait-on http://localhost:3300 && electron .\"",
+    "build": "next build",
+    "start": "electron .",
+    "dist": "next build && electron-builder",
+    "lint": "next lint"
+  },
+  "dependencies": {
+    "next": "^15.1.0",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "zustand": "^5.0.0",
+    "lucide-react": "^0.468.0",
+    "uuid": "^11.0.0",
+    "better-sqlite3": "^11.0.0"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4.0.0",
+    "@types/better-sqlite3": "^7.6.0",
+    "@types/node": "^22.0.0",
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
+    "@types/uuid": "^10.0.0",
+    "concurrently": "^9.1.0",
+    "electron": "^33.0.0",
+    "electron-builder": "^25.1.0",
+    "postcss": "^8.5.0",
+    "tailwindcss": "^4.0.0",
+    "typescript": "^5.7.0",
+    "wait-on": "^8.0.0"
+  },
+  "build": {
+    "appId": "com.avosos.noveltea",
+    "productName": "NovelTea",
+    "directories": {
+      "output": "dist-electron"
+    },
+    "files": [
+      "out/**/*",
+      "electron/**/*",
+      "package.json"
+    ],
+    "win": {
+      "target": ["nsis", "portable"],
+      "icon": "public/icon.ico"
+    },
+    "mac": {
+      "target": "dmg",
+      "icon": "public/icon.icns"
+    },
+    "linux": {
+      "target": "AppImage",
+      "icon": "public/icon.png"
+    }
+  }
+}
