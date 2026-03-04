@@ -2,13 +2,15 @@
 
 import React, { useMemo } from "react";
 import { useNovelTeaStore } from "@/stores/noveltea-store";
+import { getTranslations } from "@/lib/i18n";
 import type { Chapter, Plotline } from "@/types";
 
 const ACT_LABELS = ["Act I — Setup", "Act II — Confrontation", "Act III — Resolution"];
 const ACT_COLORS = ["#60a5fa", "#f59e0b", "#ef4444"];
 
 export default function StoryMapView() {
-  const { story, chapters, wordCount } = useNovelTeaStore();
+  const { story, chapters, wordCount, settings } = useNovelTeaStore();
+  const t = getTranslations(settings.language || "de");
 
   const plotlines = story?.plotlines || [];
   const acts = story?.acts || [];
@@ -29,9 +31,9 @@ export default function StoryMapView() {
   return (
     <div style={{ height: "100%", overflow: "auto", padding: 32 }}>
       <div style={{ maxWidth: 1100, margin: "0 auto" }}>
-        <h1 style={{ fontSize: 22, fontWeight: 800, color: "var(--text-primary)", marginBottom: 8 }}>Story Map</h1>
+        <h1 style={{ fontSize: 22, fontWeight: 800, color: "var(--text-primary)", marginBottom: 8 }}>{t.storyMap.title}</h1>
         <p style={{ fontSize: 13, color: "var(--text-muted)", marginBottom: 28 }}>
-          Three-act structure overview with plotline threads
+          {t.storyMap.subtitle}
         </p>
 
         {/* Three-act bar */}
@@ -114,7 +116,7 @@ export default function StoryMapView() {
         {/* Plotlines */}
         {plotlines.length > 0 && (
           <>
-            <h2 style={{ fontSize: 16, fontWeight: 700, color: "var(--text-primary)", marginBottom: 16 }}>Plotlines</h2>
+            <h2 style={{ fontSize: 16, fontWeight: 700, color: "var(--text-primary)", marginBottom: 16 }}>{t.storyMap.plotlines}</h2>
             <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
               {plotlines.map((pl) => (
                 <PlotlineRow key={pl.id} plotline={pl} chapters={chapters} />
@@ -126,7 +128,7 @@ export default function StoryMapView() {
         {/* Hero's Journey reference */}
         <div style={{ marginTop: 40, padding: 24, background: "var(--bg-card)", border: "1px solid var(--border-subtle)", borderRadius: "var(--radius-sm)" }}>
           <h3 style={{ fontSize: 14, fontWeight: 700, color: "var(--text-primary)", marginBottom: 12 }}>
-            Hero&apos;s Journey Reference
+            {t.storyMap.herosJourney}
           </h3>
           <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 8 }}>
             {[

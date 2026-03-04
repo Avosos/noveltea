@@ -3,9 +3,11 @@
 import React, { useState, useMemo, useCallback } from "react";
 import { Search as SearchIcon, FileText, User, MapPin, Building, Gem, ScrollText } from "lucide-react";
 import { useNovelTeaStore } from "@/stores/noveltea-store";
+import { getTranslations } from "@/lib/i18n";
 
 export default function SearchView() {
-  const { chapters, entities, selectScene, selectEntity } = useNovelTeaStore();
+  const { chapters, entities, selectScene, selectEntity, settings } = useNovelTeaStore();
+  const t = getTranslations(settings.language || "de");
   const [query, setQuery] = useState("");
 
   const results = useMemo(() => {
@@ -54,7 +56,7 @@ export default function SearchView() {
   return (
     <div style={{ height: "100%", overflow: "auto", padding: 32 }}>
       <div style={{ maxWidth: 700, margin: "0 auto" }}>
-        <h1 style={{ fontSize: 22, fontWeight: 800, color: "var(--text-primary)", marginBottom: 20 }}>Search</h1>
+        <h1 style={{ fontSize: 22, fontWeight: 800, color: "var(--text-primary)", marginBottom: 20 }}>{t.search.title}</h1>
 
         <div style={{ position: "relative", marginBottom: 24 }}>
           <SearchIcon size={16} style={{ position: "absolute", left: 14, top: "50%", transform: "translateY(-50%)", color: "var(--text-dim)" }} />
@@ -63,14 +65,14 @@ export default function SearchView() {
             style={{ width: "100%", padding: "12px 16px 12px 42px", fontSize: 15 }}
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder="Search scenes, entities, and tags..."
+            placeholder={t.search.placeholder}
             autoFocus
           />
         </div>
 
         {query.trim() && (
           <p style={{ fontSize: 12, color: "var(--text-muted)", marginBottom: 16 }}>
-            {totalResults} result{totalResults !== 1 ? "s" : ""} for &ldquo;{query}&rdquo;
+            {totalResults} {totalResults !== 1 ? t.search.results : t.search.result} {t.search.forQuery} &ldquo;{query}&rdquo;
           </p>
         )}
 
@@ -78,7 +80,7 @@ export default function SearchView() {
         {results.scenes.length > 0 && (
           <div style={{ marginBottom: 28 }}>
             <h2 style={{ fontSize: 13, fontWeight: 700, color: "var(--text-secondary)", marginBottom: 10, textTransform: "uppercase", letterSpacing: 0.5 }}>
-              Scenes ({results.scenes.length})
+              {t.search.scenesCount} ({results.scenes.length})
             </h2>
             <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
               {results.scenes.map((r) => (
@@ -99,7 +101,7 @@ export default function SearchView() {
                     <span style={{ fontSize: 13, fontWeight: 600, color: "var(--text-primary)" }}>
                       {r.sceneTitle}
                     </span>
-                    <span style={{ fontSize: 11, color: "var(--text-dim)" }}>in {r.chapterTitle}</span>
+                    <span style={{ fontSize: 11, color: "var(--text-dim)" }}>{t.search.inChapter} {r.chapterTitle}</span>
                   </div>
                   {r.snippet && (
                     <HighlightedSnippet text={r.snippet} query={query} />
@@ -114,7 +116,7 @@ export default function SearchView() {
         {results.entities.length > 0 && (
           <div>
             <h2 style={{ fontSize: 13, fontWeight: 700, color: "var(--text-secondary)", marginBottom: 10, textTransform: "uppercase", letterSpacing: 0.5 }}>
-              Entities ({results.entities.length})
+              {t.search.entitiesCount} ({results.entities.length})
             </h2>
             <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
               {results.entities.map((e) => (
@@ -144,7 +146,7 @@ export default function SearchView() {
         {query.trim() && totalResults === 0 && (
           <div style={{ textAlign: "center", padding: 60, color: "var(--text-dim)" }}>
             <SearchIcon size={32} style={{ margin: "0 auto 12px", opacity: 0.3 }} />
-            <p style={{ fontSize: 14 }}>No results found.</p>
+            <p style={{ fontSize: 14 }}>{t.search.noResults}</p>
           </div>
         )}
       </div>

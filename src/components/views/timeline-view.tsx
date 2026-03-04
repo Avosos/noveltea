@@ -3,9 +3,11 @@
 import React, { useMemo } from "react";
 import { Clock, Eye } from "lucide-react";
 import { useNovelTeaStore } from "@/stores/noveltea-store";
+import { getTranslations } from "@/lib/i18n";
 
 export default function TimelineView() {
-  const { chapters, entities } = useNovelTeaStore();
+  const { chapters, entities, settings } = useNovelTeaStore();
+  const t = getTranslations(settings.language || "de");
 
   // Flatten scenes in order with chapter context
   const timelineItems = useMemo(() => {
@@ -38,9 +40,9 @@ export default function TimelineView() {
   return (
     <div style={{ height: "100%", overflow: "auto", padding: 32 }}>
       <div style={{ maxWidth: 800, margin: "0 auto" }}>
-        <h1 style={{ fontSize: 22, fontWeight: 800, color: "var(--text-primary)", marginBottom: 8 }}>Timeline</h1>
+        <h1 style={{ fontSize: 22, fontWeight: 800, color: "var(--text-primary)", marginBottom: 8 }}>{t.timeline.title}</h1>
         <p style={{ fontSize: 13, color: "var(--text-muted)", marginBottom: 28 }}>
-          Chronological scene progression · {timelineItems.length} scenes
+          {t.timeline.subtitle} · {timelineItems.length} {t.chapters.scenes}
         </p>
 
         {/* Tension curve overview */}
@@ -154,7 +156,7 @@ export default function TimelineView() {
 
         {timelineItems.length === 0 && (
           <div style={{ textAlign: "center", padding: 60, color: "var(--text-dim)" }}>
-            No scenes yet. Create chapters and scenes to see the timeline.
+            {t.timeline.noScenes}
           </div>
         )}
       </div>

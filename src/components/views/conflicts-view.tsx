@@ -3,16 +3,18 @@
 import React, { useState } from "react";
 import { Plus, Trash2, AlertTriangle, CheckCircle, Clock, Crosshair, ChevronDown, ChevronRight } from "lucide-react";
 import { useNovelTeaStore } from "@/stores/noveltea-store";
+import { getTranslations } from "@/lib/i18n";
 import type { Conflict } from "@/types";
 
-const STATUS_META: Record<Conflict["status"], { label: string; color: string; icon: React.ReactNode }> = {
-  planted: { label: "Planted", color: "#60a5fa", icon: <Clock size={13} /> },
-  active: { label: "Active", color: "#f59e0b", icon: <AlertTriangle size={13} /> },
-  resolved: { label: "Resolved", color: "#34d399", icon: <CheckCircle size={13} /> },
-};
-
 export default function ConflictsView() {
-  const { story, updateStory } = useNovelTeaStore();
+  const { story, updateStory, settings } = useNovelTeaStore();
+  const t = getTranslations(settings.language || "de");
+
+  const STATUS_META: Record<Conflict["status"], { label: string; color: string; icon: React.ReactNode }> = {
+    planted: { label: t.conflicts.planted, color: "#60a5fa", icon: <Clock size={13} /> },
+    active: { label: t.conflicts.active, color: "#f59e0b", icon: <AlertTriangle size={13} /> },
+    resolved: { label: t.conflicts.resolved, color: "#34d399", icon: <CheckCircle size={13} /> },
+  };
   const conflicts = story?.conflicts || [];
   const [expanded, setExpanded] = useState<Record<string, boolean>>({});
 
@@ -55,14 +57,14 @@ export default function ConflictsView() {
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 24 }}>
           <div>
             <h1 style={{ fontSize: 22, fontWeight: 800, color: "var(--text-primary)", marginBottom: 4 }}>
-              Conflicts & Chekhov&apos;s Guns
+              {t.conflicts.title}
             </h1>
             <p style={{ fontSize: 13, color: "var(--text-muted)" }}>
-              {conflicts.length} conflict{conflicts.length !== 1 ? "s" : ""} · {grouped.active.length} active · {grouped.planted.length} planted
+              {conflicts.length} {t.conflicts.subtitle} · {grouped.active.length} {t.conflicts.active.toLowerCase()} · {grouped.planted.length} {t.conflicts.planted.toLowerCase()}
             </p>
           </div>
           <button className="btn-primary" onClick={addConflict} style={{ display: "flex", alignItems: "center", gap: 6 }}>
-            <Plus size={16} /> New Conflict
+            <Plus size={16} /> {t.conflicts.newConflict}
           </button>
         </div>
 
@@ -131,7 +133,7 @@ export default function ConflictsView() {
                   <div style={{ borderTop: "1px solid var(--border-subtle)", padding: "16px 16px 16px 40px" }}>
                     <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: 12 }}>
                       <div>
-                        <label style={{ fontSize: 11, fontWeight: 600, color: "var(--text-dim)", display: "block", marginBottom: 4 }}>Name</label>
+                        <label style={{ fontSize: 11, fontWeight: 600, color: "var(--text-dim)", display: "block", marginBottom: 4 }}>{t.conflicts.name}</label>
                         <input
                           className="input"
                           style={{ width: "100%" }}
@@ -140,24 +142,24 @@ export default function ConflictsView() {
                         />
                       </div>
                       <div>
-                        <label style={{ fontSize: 11, fontWeight: 600, color: "var(--text-dim)", display: "block", marginBottom: 4 }}>Type</label>
+                        <label style={{ fontSize: 11, fontWeight: 600, color: "var(--text-dim)", display: "block", marginBottom: 4 }}>{t.conflicts.typeLabel}</label>
                         <select
                           className="input"
                           style={{ width: "100%" }}
                           value={conflict.type}
                           onChange={(e) => updateConflict(conflict.id, { type: e.target.value as Conflict["type"] })}
                         >
-                          <option value="interpersonal">Interpersonal</option>
-                          <option value="internal">Internal</option>
-                          <option value="societal">Societal</option>
-                          <option value="environmental">Environmental</option>
-                          <option value="chekhovs-gun">Chekhov&apos;s Gun</option>
+                          <option value="interpersonal">{t.conflicts.interpersonal}</option>
+                          <option value="internal">{t.conflicts.internal}</option>
+                          <option value="societal">{t.conflicts.societal}</option>
+                          <option value="environmental">{t.conflicts.environmental}</option>
+                          <option value="chekhovs-gun">{t.conflicts.chekhovsGun}</option>
                         </select>
                       </div>
                     </div>
 
                     <div style={{ marginBottom: 12 }}>
-                      <label style={{ fontSize: 11, fontWeight: 600, color: "var(--text-dim)", display: "block", marginBottom: 4 }}>Description</label>
+                      <label style={{ fontSize: 11, fontWeight: 600, color: "var(--text-dim)", display: "block", marginBottom: 4 }}>{t.conflicts.description}</label>
                       <textarea
                         className="input"
                         style={{ width: "100%", minHeight: 60, resize: "vertical" }}
@@ -169,22 +171,22 @@ export default function ConflictsView() {
 
                     <div style={{ display: "flex", gap: 12, marginBottom: 12 }}>
                       <div style={{ flex: 1 }}>
-                        <label style={{ fontSize: 11, fontWeight: 600, color: "var(--text-dim)", display: "block", marginBottom: 4 }}>Status</label>
+                        <label style={{ fontSize: 11, fontWeight: 600, color: "var(--text-dim)", display: "block", marginBottom: 4 }}>{t.conflicts.status}</label>
                         <select
                           className="input"
                           style={{ width: "100%" }}
                           value={conflict.status}
                           onChange={(e) => updateConflict(conflict.id, { status: e.target.value as Conflict["status"] })}
                         >
-                          <option value="planted">Planted</option>
-                          <option value="active">Active</option>
-                          <option value="resolved">Resolved</option>
+                          <option value="planted">{t.conflicts.planted}</option>
+                          <option value="active">{t.conflicts.active}</option>
+                          <option value="resolved">{t.conflicts.resolved}</option>
                         </select>
                       </div>
                     </div>
 
                     <div>
-                      <label style={{ fontSize: 11, fontWeight: 600, color: "var(--text-dim)", display: "block", marginBottom: 4 }}>Notes</label>
+                      <label style={{ fontSize: 11, fontWeight: 600, color: "var(--text-dim)", display: "block", marginBottom: 4 }}>{t.conflicts.notes}</label>
                       <textarea
                         className="input"
                         style={{ width: "100%", minHeight: 50, resize: "vertical" }}

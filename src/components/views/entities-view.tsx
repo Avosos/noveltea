@@ -3,6 +3,7 @@
 import React, { useState, useMemo } from "react";
 import { Plus, Search, Grid, List, User, MapPin, Building, Gem, ScrollText } from "lucide-react";
 import { useNovelTeaStore } from "@/stores/noveltea-store";
+import { getTranslations } from "@/lib/i18n";
 import type { EntityType, BaseEntity } from "@/types";
 
 const ENTITY_TYPES: { type: EntityType; label: string; icon: React.ReactNode; color: string }[] = [
@@ -14,7 +15,8 @@ const ENTITY_TYPES: { type: EntityType; label: string; icon: React.ReactNode; co
 ];
 
 export default function EntitiesView() {
-  const { entities, addEntity, setView } = useNovelTeaStore();
+  const { entities, addEntity, setView, settings } = useNovelTeaStore();
+  const t = getTranslations(settings.language || "de");
   const [filterType, setFilterType] = useState<EntityType | "all">("all");
   const [searchQuery, setSearchQuery] = useState("");
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
@@ -41,7 +43,7 @@ export default function EntitiesView() {
         {/* Header */}
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 20 }}>
           <div>
-            <h1 style={{ fontSize: 22, fontWeight: 800, color: "var(--text-primary)" }}>Worldbuilding</h1>
+            <h1 style={{ fontSize: 22, fontWeight: 800, color: "var(--text-primary)" }}>{t.entities.title}</h1>
             <p style={{ fontSize: 13, color: "var(--text-muted)" }}>{entities.length} entities</p>
           </div>
           <div style={{ display: "flex", gap: 8 }}>
@@ -64,14 +66,14 @@ export default function EntitiesView() {
             <Search size={14} style={{ position: "absolute", left: 10, top: "50%", transform: "translateY(-50%)", color: "var(--text-dim)" }} />
             <input
               className="input"
-              placeholder="Search entities..."
+              placeholder={t.entities.searchEntities}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               style={{ paddingLeft: 32, width: "100%" }}
             />
           </div>
           <div style={{ display: "flex", gap: 4 }}>
-            <FilterBtn active={filterType === "all"} onClick={() => setFilterType("all")}>All</FilterBtn>
+            <FilterBtn active={filterType === "all"} onClick={() => setFilterType("all")}>{t.entities.all}</FilterBtn>
             {ENTITY_TYPES.map((et) => (
               <FilterBtn key={et.type} active={filterType === et.type} onClick={() => setFilterType(et.type)}>
                 {et.icon} {et.label}
@@ -116,7 +118,7 @@ export default function EntitiesView() {
                   </div>
                   <div style={{ fontSize: 14, fontWeight: 600, color: "var(--text-primary)", marginBottom: 6 }}>{entity.name}</div>
                   <div style={{ fontSize: 12, color: "var(--text-muted)", lineHeight: 1.5, display: "-webkit-box", WebkitLineClamp: 3, WebkitBoxOrient: "vertical", overflow: "hidden" }}>
-                    {entity.description || "No description"}
+                    {entity.description || t.entities.noDescription}
                   </div>
                   {entity.tags.length > 0 && (
                     <div style={{ display: "flex", gap: 4, marginTop: 10, flexWrap: "wrap" }}>
@@ -163,7 +165,7 @@ export default function EntitiesView() {
 
         {filtered.length === 0 && (
           <div style={{ textAlign: "center", padding: 60, color: "var(--text-dim)" }}>
-            <p style={{ fontSize: 14 }}>{searchQuery ? "No entities match your search." : "No entities yet."}</p>
+            <p style={{ fontSize: 14 }}>{searchQuery ? t.entities.noMatch : t.entities.noEntities}</p>
           </div>
         )}
       </div>

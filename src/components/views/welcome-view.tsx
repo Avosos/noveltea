@@ -3,11 +3,14 @@
 import React, { useState, useEffect } from "react";
 import { Plus, FolderOpen, Clock, BookOpen, Trash2 } from "lucide-react";
 import { useNovelTeaStore } from "@/stores/noveltea-store";
+import { getTranslations } from "@/lib/i18n";
 
 export default function WelcomeView() {
   const recentProjects = useNovelTeaStore((s) => s.recentProjects);
   const createProject = useNovelTeaStore((s) => s.createProject);
   const openProject = useNovelTeaStore((s) => s.openProject);
+  const settings = useNovelTeaStore((s) => s.settings);
+  const t = getTranslations(settings.language || "de");
   const [projectName, setProjectName] = useState("");
   const [showCreate, setShowCreate] = useState(false);
 
@@ -38,7 +41,7 @@ export default function WelcomeView() {
             NovelTea
           </h1>
           <p style={{ fontSize: 14, color: "var(--text-muted)", marginTop: 8 }}>
-            Structured authoring for novels and narrative worlds
+            {t.welcome.subtitle}
           </p>
         </div>
 
@@ -47,12 +50,12 @@ export default function WelcomeView() {
           <button className="btn-primary" style={{ display: "flex", alignItems: "center", gap: 8, padding: "12px 24px", fontSize: 14 }}
             onClick={() => setShowCreate(true)}>
             <Plus size={18} />
-            New Project
+            {t.welcome.newProject}
           </button>
           <button className="btn-secondary" style={{ display: "flex", alignItems: "center", gap: 8, padding: "12px 24px", fontSize: 14 }}
             onClick={handleOpen}>
             <FolderOpen size={18} />
-            Open Project
+            {t.welcome.openProject}
           </button>
         </div>
 
@@ -60,19 +63,19 @@ export default function WelcomeView() {
         {showCreate && (
           <div className="card animate-fadeIn" style={{ padding: 20, marginBottom: 32 }}>
             <div style={{ fontSize: 14, fontWeight: 600, color: "var(--text-primary)", marginBottom: 12 }}>
-              Create New Project
+              {t.welcome.createNewProject}
             </div>
             <div style={{ display: "flex", gap: 8 }}>
               <input
                 className="input"
-                placeholder="Project name…"
+                placeholder={t.welcome.projectName}
                 value={projectName}
                 onChange={(e) => setProjectName(e.target.value)}
                 onKeyDown={(e) => e.key === "Enter" && handleCreate()}
                 autoFocus
               />
-              <button className="btn-primary" onClick={handleCreate}>Create</button>
-              <button className="btn-ghost" onClick={() => setShowCreate(false)}>Cancel</button>
+              <button className="btn-primary" onClick={handleCreate}>{t.welcome.create}</button>
+              <button className="btn-ghost" onClick={() => setShowCreate(false)}>{t.welcome.cancel}</button>
             </div>
           </div>
         )}
@@ -83,7 +86,7 @@ export default function WelcomeView() {
             <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 12 }}>
               <Clock size={14} style={{ color: "var(--text-dim)" }} />
               <span style={{ fontSize: 12, fontWeight: 600, color: "var(--text-dim)", textTransform: "uppercase", letterSpacing: 1 }}>
-                Recent Projects
+                {t.welcome.recentProjects}
               </span>
             </div>
             <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
