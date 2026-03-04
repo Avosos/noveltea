@@ -2,6 +2,8 @@
  * NovelTea — Type Definitions
  * ══════════════════════════════════════════════════════════════════════════════ */
 
+import type { Language } from "@/lib/i18n";
+
 /* ─── Project ────────────────────────────────────────────── */
 export interface Project {
   id: string;
@@ -106,8 +108,19 @@ export interface CharacterEntity extends BaseEntity {
   appearance?: string;
   personality?: string;
   arc?: string;
+  nationality?: string;
+  languages?: string[];
+  skills?: string[];
+  customFields?: CustomField[];
+  dialogueColor?: string;
+  mentionColor?: string;
   relationships: Relationship[];
   stateChanges: StateChange[];
+}
+
+export interface CustomField {
+  key: string;
+  value: string;
 }
 
 export interface LocationEntity extends BaseEntity {
@@ -184,6 +197,43 @@ export interface Snapshot {
   createdAt: number;
 }
 
+/* ─── Sources & Citations ────────────────────────────────── */
+export interface Source {
+  id: string;
+  title: string;
+  author: string;
+  year: string;
+  url?: string;
+  publisher?: string;
+  pages?: string;
+  type: "book" | "article" | "website" | "journal" | "other";
+  notes?: string;
+  createdAt: number;
+}
+
+export interface Footnote {
+  id: string;
+  sourceId?: string;
+  text: string;
+  chapterId?: string;
+  sceneId?: string;
+  position?: number;
+  createdAt: number;
+}
+
+/* ─── Dialogue Attribution ───────────────────────────────── */
+export interface DialogueAttribution {
+  id: string;
+  characterId: string;
+  type: "speech" | "mention";
+  text: string;
+  chapterId: string;
+  sceneId: string;
+  startOffset: number;
+  endOffset: number;
+  createdAt: number;
+}
+
 /* ─── Settings ───────────────────────────────────────────── */
 export interface NovelTeaSettings {
   theme: "dark" | "grey" | "light";
@@ -195,6 +245,9 @@ export interface NovelTeaSettings {
   typewriterMode: boolean;
   focusMode: boolean;
   spellcheck: boolean;
+  language: Language;
+  highlightDates: boolean;
+  highlightNames: boolean;
 }
 
 /* ─── Application Views ──────────────────────────────────── */
@@ -209,7 +262,10 @@ export type AppView =
   | "conflicts"
   | "search"
   | "settings"
-  | "stats";
+  | "stats"
+  | "graph"
+  | "sources"
+  | "dialogue";
 
 /* ─── Electron API (window.electronAPI) ──────────────────── */
 export interface ElectronAPI {
