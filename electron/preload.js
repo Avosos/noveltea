@@ -28,8 +28,8 @@ contextBridge.exposeInMainWorld("electronAPI", {
   saveChapter: (dirPath, chapter) => ipcRenderer.invoke("project:save-chapter", dirPath, chapter),
   deleteChapter: (dirPath, chapterId) => ipcRenderer.invoke("project:delete-chapter", dirPath, chapterId),
   saveStory: (dirPath, story) => ipcRenderer.invoke("project:save-story", dirPath, story),
-  saveEntity: (dirPath, type, entity) => ipcRenderer.invoke("project:save-entity", dirPath, type, entity),
-  deleteEntity: (dirPath, type, entityId) => ipcRenderer.invoke("project:delete-entity", dirPath, type, entityId),
+  saveEntity: (dirPath, entity) => ipcRenderer.invoke("project:save-entity", dirPath, entity),
+  deleteEntity: (dirPath, entityId) => ipcRenderer.invoke("project:delete-entity", dirPath, entityId),
   saveProject: (dirPath, project) => ipcRenderer.invoke("project:save-project", dirPath, project),
 
   // Snapshots

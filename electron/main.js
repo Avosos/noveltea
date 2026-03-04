@@ -30,12 +30,13 @@ function ensureDataDirs() {
     fs.writeFileSync(SETTINGS_FILE, JSON.stringify({
       theme: "dark",
       accentColor: "#a3e635",
-      fontSize: 16,
-      fontFamily: "Georgia, serif",
-      editorWidth: 720,
+      editorFont: "Georgia, serif",
+      editorFontSize: 16,
+      editorLineHeight: 1.8,
       autosaveInterval: 30000,
+      showWordCount: true,
+      typewriterMode: false,
       focusMode: false,
-      showLineNumbers: false,
       spellcheck: true,
     }), "utf-8");
   }
@@ -229,17 +230,16 @@ ipcMain.handle("project:open", async (_, dirPath) => {
   }
   chapters.sort((a, b) => a.order - b.order);
 
-  // Load entities
-  const entities = {};
-  const entityTypes = ["characters", "locations", "organizations", "artifacts", "lore"];
-  for (const type of entityTypes) {
-    const dir = path.join(dirPath, "entities", type);
-    entities[type] = [];
+  // Load entities (flat array)
+  const entities = [];
+  const entityDirs = ["characters", "locations", "organizations", "artifacts", "lore"];
+  for (const dirName of entityDirs) {
+    const dir = path.join(dirPath, "entities", dirName);
     if (fs.existsSync(dir)) {
       const files = fs.readdirSync(dir).filter((f) => f.endsWith(".json"));
       for (const file of files) {
         const entity = readJSON(path.join(dir, file));
-        if (entity) entities[type].push(entity);
+        if (entity) entities.push(entity);
       }
     }
   }
@@ -266,18 +266,32 @@ ipcMain.handle("project:save-story", (_, dirPath, story) => {
   return true;
 });
 
-ipcMain.handle("project:save-entity", (_, dirPath, entityType, entity) => {
-  const dir = path.join(dirPath, "entities", entityType);
+// Helper: map singular entityType to plural directory name
+function entityTypeToDir(entityType) {
+  const map = { character: "characters", location: "locations", organization: "organizations", artifact: "artifacts", lore: "lore" };
+  return map[entityType] || entityType;
+}
+
+ipcMain.handle("project:save-entity", (_, dirPath, entity) => {
+  const dirName = entityTypeToDir(entity.entityType);
+  const dir = path.join(dirPath, "entities", dirName);
   if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
   entity.updatedAt = Date.now();
   writeJSON(path.join(dir, `${entity.id}.json`), entity);
   return true;
 });
 
-ipcMain.handle("project:delete-entity", (_, dirPath, entityType, entityId) => {
-  const filePath = path.join(dirPath, "entities", entityType, `${entityId}.json`);
-  if (fs.existsSync(filePath)) fs.unlinkSync(filePath);
-  return true;
+ipcMain.handle("project:delete-entity", (_, dirPath, entityId) => {
+  // Search all entity directories for the file
+  const entityDirs = ["characters", "locations", "organizations", "artifacts", "lore"];
+  for (const dirName of entityDirs) {
+    const filePath = path.join(dirPath, "entities", dirName, `${entityId}.json`);
+    if (fs.existsSync(filePath)) {
+      fs.unlinkSync(filePath);
+      return true;
+    }
+  }
+  return false;
 });
 
 ipcMain.handle("project:save-project", (_, dirPath, project) => {

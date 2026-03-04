@@ -6,7 +6,7 @@ import {
   Info, Users, MapPin, Target, Hash, Clock,
 } from "lucide-react";
 import { useNovelTeaStore } from "@/stores/noveltea-store";
-import type { Scene, Entity } from "@/types";
+import type { Scene, BaseEntity } from "@/types";
 
 export default function EditorView() {
   const {
@@ -108,7 +108,7 @@ export default function EditorView() {
               <div>{scene.title}</div>
               {scene.pov && (
                 <div style={{ fontSize: 10, color: "var(--text-dim)", marginTop: 2 }}>
-                  POV: {entities.characters.find((c) => c.id === scene.pov)?.name || "—"}
+                  POV: {entities.find((c) => c.entityType === "character" && c.id === scene.pov)?.name || "—"}
                 </div>
               )}
             </button>
@@ -184,8 +184,8 @@ export default function EditorView() {
               background: "transparent",
               border: "none",
               resize: "none",
-              fontFamily: settings.fontFamily || "Georgia, serif",
-              fontSize: settings.fontSize || 16,
+              fontFamily: settings.editorFont || "Georgia, serif",
+              fontSize: settings.editorFontSize || 16,
             }}
             spellCheck={settings.spellcheck}
           />
@@ -207,8 +207,8 @@ export default function EditorView() {
 /* ─── Scene Metadata Bar ─── */
 function SceneMetadataBar({ scene, chapterId }: { scene: Scene; chapterId: string }) {
   const { updateScene, entities } = useNovelTeaStore();
-  const characters = entities.characters || [];
-  const locations = entities.locations || [];
+  const characters = entities.filter((e) => e.entityType === "character");
+  const locations = entities.filter((e) => e.entityType === "location");
 
   return (
     <div style={{
@@ -339,8 +339,8 @@ function StoryContextPanel({
   scene, mentionedEntities, onSelectEntity,
 }: {
   scene: Scene;
-  mentionedEntities: Entity[];
-  onSelectEntity: (type: string, id: string) => void;
+  mentionedEntities: BaseEntity[];
+  onSelectEntity: (id: string) => void;
 }) {
   const { entities, chapters, story } = useNovelTeaStore();
 
@@ -369,7 +369,7 @@ function StoryContextPanel({
           {mentionedEntities.map((e) => (
             <button
               key={e.id}
-              onClick={() => onSelectEntity(e.type, e.id)}
+              onClick={() => onSelectEntity(e.id)}
               style={{
                 display: "flex",
                 alignItems: "center",
@@ -388,7 +388,7 @@ function StoryContextPanel({
               onMouseEnter={(e) => (e.currentTarget.style.background = "var(--bg-hover)")}
               onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}
             >
-              <EntityTypeBadge type={e.type} />
+              <EntityTypeBadge type={e.entityType} />
               <span>{e.name}</span>
             </button>
           ))}
@@ -399,7 +399,7 @@ function StoryContextPanel({
       {scene.pov && (
         <ContextSection title="POV Character" icon={<Users size={13} />}>
           {(() => {
-            const char = entities.characters.find((c) => c.id === scene.pov);
+            const char = entities.find((c) => c.entityType === "character" && c.id === scene.pov);
             if (!char) return <span style={{ fontSize: 12, color: "var(--text-dim)" }}>Unknown</span>;
             return (
               <div style={{ fontSize: 12, color: "var(--text-secondary)" }}>
@@ -416,7 +416,7 @@ function StoryContextPanel({
       {scene.location && (
         <ContextSection title="Location" icon={<MapPin size={13} />}>
           {(() => {
-            const loc = entities.locations.find((l) => l.id === scene.location);
+            const loc = entities.find((l) => l.entityType === "location" && l.id === scene.location);
             if (!loc) return null;
             return (
               <div style={{ fontSize: 12, color: "var(--text-secondary)" }}>
@@ -436,7 +436,7 @@ function StoryContextPanel({
               <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
                 <span style={{
                   width: 6, height: 6, borderRadius: "50%", flexShrink: 0,
-                  background: c.status === "open" ? "var(--warning)" : "var(--info)",
+                  background: c.status === "planted" ? "var(--warning)" : "var(--info)",
                 }} />
                 <span style={{ color: "var(--text-secondary)", fontWeight: 500 }}>{c.name}</span>
               </div>
@@ -484,10 +484,10 @@ function ContextSection({ title, icon, children }: { title: string; icon: React.
 
 function EntityTypeBadge({ type }: { type: string }) {
   const colors: Record<string, string> = {
-    characters: "#60a5fa",
-    locations: "#4ade80",
-    organizations: "#fbbf24",
-    artifacts: "#e879f9",
+    character: "#60a5fa",
+    location: "#4ade80",
+    organization: "#fbbf24",
+    artifact: "#e879f9",
     lore: "#f97316",
   };
   return (
