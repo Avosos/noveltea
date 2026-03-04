@@ -1,11 +1,13 @@
 "use client";
 
-import React, { useState, useEffect, useRef, useCallback } from "react";
+import React, { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import {
   Eye, EyeOff, Save, ChevronLeft, ChevronRight, Maximize2, Minimize2,
-  Info, Users, MapPin, Target, Hash, Clock,
+  Info, Users, MapPin, Target, Hash, Clock, MessageSquare,
 } from "lucide-react";
 import { useNovelTeaStore } from "@/stores/noveltea-store";
+import { getTranslations } from "@/lib/i18n";
+import { useToast } from "@/components/ui/toast";
 import type { Scene, BaseEntity, CharacterEntity } from "@/types";
 
 export default function EditorView() {
@@ -14,7 +16,10 @@ export default function EditorView() {
     toggleFocusMode, toggleContextPanel, updateScene, settings,
     getActiveChapter, getActiveScene, getEntitiesInScene, entities, selectEntity,
     addScene, selectScene, wordCount, refreshWordCount,
+    addDialogueAttribution,
   } = useNovelTeaStore();
+  const t = getTranslations(settings.language || "de");
+  const { showToast } = useToast();
 
   const activeChapter = getActiveChapter();
   const activeScene = getActiveScene();
@@ -33,8 +38,9 @@ export default function EditorView() {
     if (localContent !== activeScene.content) {
       updateScene(activeChapterId, { ...activeScene, content: localContent });
       refreshWordCount();
+      showToast(t.editor.saved, "success");
     }
-  }, [activeChapterId, activeSceneId, activeScene, localContent, updateScene, refreshWordCount]);
+  }, [activeChapterId, activeSceneId, activeScene, localContent, updateScene, refreshWordCount, showToast, t]);
 
   useEffect(() => {
     if (autosaveTimerRef.current) clearTimeout(autosaveTimerRef.current);
@@ -62,10 +68,57 @@ export default function EditorView() {
   // Scene word count
   const sceneWords = localContent.trim().split(/\s+/).filter(Boolean).length;
 
+  // Characters for dialogue attribution
+  const characters = useMemo(() => entities.filter((e) => e.entityType === "character"), [entities]);
+
+  // Dialogue marking state
+  const [showDialogueMenu, setShowDialogueMenu] = useState(false);
+  const [dialogueMenuPos, setDialogueMenuPos] = useState({ x: 0, y: 0 });
+  const [selectedText, setSelectedText] = useState({ text: "", start: 0, end: 0 });
+
+  const handleTextSelect = useCallback(() => {
+    const el = editorRef.current;
+    if (!el) return;
+    const start = el.selectionStart;
+    const end = el.selectionEnd;
+    if (start !== end) {
+      const text = localContent.slice(start, end);
+      setSelectedText({ text, start, end });
+    }
+  }, [localContent]);
+
+  const handleContextMenu = useCallback((e: React.MouseEvent) => {
+    const el = editorRef.current;
+    if (!el) return;
+    const start = el.selectionStart;
+    const end = el.selectionEnd;
+    if (start !== end) {
+      e.preventDefault();
+      setSelectedText({ text: localContent.slice(start, end), start, end });
+      setDialogueMenuPos({ x: e.clientX, y: e.clientY });
+      setShowDialogueMenu(true);
+    }
+  }, [localContent]);
+
+  const markAsDialogue = (characterId: string, type: "speech" | "mention") => {
+    if (!activeChapterId || !activeSceneId || !selectedText.text) return;
+    addDialogueAttribution({
+      characterId,
+      type,
+      text: selectedText.text,
+      chapterId: activeChapterId,
+      sceneId: activeSceneId,
+      startOffset: selectedText.start,
+      endOffset: selectedText.end,
+    });
+    setShowDialogueMenu(false);
+    showToast(`${type === "speech" ? t.editor.markAsSpeech : t.editor.markAsMention} ✓`, "success");
+  };
+
   if (!activeChapter || !activeScene) {
     return (
       <div style={{ height: "100%", display: "flex", alignItems: "center", justifyContent: "center", color: "var(--text-muted)" }}>
-        Select a chapter and scene to start writing
+        {t.editor.selectChapterScene}
       </div>
     );
   }
