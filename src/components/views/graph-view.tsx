@@ -75,7 +75,7 @@ export default function GraphView() {
         });
         // Link chapters to entities referenced in scenes
         ch.scenes.forEach((scene) => {
-          scene.entityIds.forEach((eid) => {
+          (scene.entityIds || []).forEach((eid) => {
             edgeList.push({ source: `ch_${ch.id}`, target: `ent_${eid}` });
           });
           if (scene.pov) edgeList.push({ source: `ch_${ch.id}`, target: `ent_${scene.pov}` });

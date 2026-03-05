@@ -16,7 +16,7 @@ export default function EditorView() {
     toggleFocusMode, toggleContextPanel, updateScene, settings,
     getActiveChapter, getActiveScene, getEntitiesInScene, entities, selectEntity,
     addScene, selectScene, wordCount, refreshWordCount,
-    addDialogueAttribution,
+    addDialogueAttribution, dialogueAttributions,
   } = useNovelTeaStore();
   const t = getTranslations(settings.language || "de");
   const { showToast } = useToast();
@@ -25,6 +25,7 @@ export default function EditorView() {
   const activeScene = getActiveScene();
   const [localContent, setLocalContent] = useState(activeScene?.content ?? "");
   const editorRef = useRef<HTMLTextAreaElement>(null);
+  const backdropRef = useRef<HTMLDivElement>(null);
   const autosaveTimerRef = useRef<NodeJS.Timeout | null>(null);
 
   // Sync when scene changes
@@ -70,6 +71,59 @@ export default function EditorView() {
 
   // Characters for dialogue attribution
   const characters = useMemo(() => entities.filter((e) => e.entityType === "character"), [entities]);
+
+  // Dialogue highlight segments for current scene
+  const sceneAttributions = useMemo(() => {
+    if (!activeChapterId || !activeSceneId) return [];
+    return dialogueAttributions.filter(
+      (a) => a.chapterId === activeChapterId && a.sceneId === activeSceneId
+    );
+  }, [dialogueAttributions, activeChapterId, activeSceneId]);
+
+  // Build highlighted HTML for the backdrop
+  const highlightedHtml = useMemo(() => {
+    if (sceneAttributions.length === 0) return null;
+    // Build a map of character colors
+    const colorMap: Record<string, string> = {};
+    for (const attr of sceneAttributions) {
+      if (!colorMap[attr.characterId]) {
+        const ch = entities.find((e) => e.id === attr.characterId) as CharacterEntity | undefined;
+        colorMap[attr.characterId] = ch?.dialogueColor || "#60a5fa";
+      }
+    }
+    // Sort attributions by start offset
+    const sorted = [...sceneAttributions].sort((a, b) => a.startOffset - b.startOffset);
+    // Build segments
+    const parts: string[] = [];
+    let cursor = 0;
+    const escHtml = (s: string) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/\n$/g, "\n\n");
+    for (const attr of sorted) {
+      if (attr.startOffset > localContent.length) continue;
+      const start = Math.max(attr.startOffset, cursor);
+      const end = Math.min(attr.endOffset, localContent.length);
+      if (start >= end) continue;
+      // Text before this highlight
+      if (start > cursor) {
+        parts.push(escHtml(localContent.slice(cursor, start)));
+      }
+      const color = colorMap[attr.characterId];
+      parts.push(`<mark style="background:${color}33;border-radius:2px;color:transparent">${escHtml(localContent.slice(start, end))}</mark>`);
+      cursor = end;
+    }
+    // Remaining text
+    if (cursor < localContent.length) {
+      parts.push(escHtml(localContent.slice(cursor)));
+    }
+    return parts.join("");
+  }, [localContent, sceneAttributions, entities]);
+
+  // Sync scroll between textarea and backdrop
+  const handleEditorScroll = useCallback(() => {
+    if (editorRef.current && backdropRef.current) {
+      backdropRef.current.scrollTop = editorRef.current.scrollTop;
+      backdropRef.current.scrollLeft = editorRef.current.scrollLeft;
+    }
+  }, []);
 
   // Dialogue marking state
   const [showDialogueMenu, setShowDialogueMenu] = useState(false);
@@ -224,7 +278,24 @@ export default function EditorView() {
         )}
 
         {/* Editor */}
-        <div style={{ flex: 1, overflow: "auto", background: "var(--bg-primary)" }}>
+        <div style={{ flex: 1, overflow: "hidden", background: "var(--bg-primary)", position: "relative" }}>
+          {/* Highlight backdrop */}
+          {highlightedHtml && (
+            <div
+              ref={backdropRef}
+              className="novel-editor highlight-backdrop"
+              style={{
+                position: "absolute",
+                inset: 0,
+                overflow: "auto",
+                pointerEvents: "none",
+                color: "transparent",
+                fontFamily: settings.editorFont || "Georgia, serif",
+                fontSize: settings.editorFontSize || 16,
+              }}
+              dangerouslySetInnerHTML={{ __html: highlightedHtml }}
+            />
+          )}
           <textarea
             ref={editorRef}
             className="novel-editor"
@@ -232,6 +303,7 @@ export default function EditorView() {
             onChange={(e) => setLocalContent(e.target.value)}
             onSelect={handleTextSelect}
             onContextMenu={handleContextMenu}
+            onScroll={handleEditorScroll}
             placeholder={t.editor.beginWriting}
             style={{
               width: "100%",
@@ -239,6 +311,8 @@ export default function EditorView() {
               background: "transparent",
               border: "none",
               resize: "none",
+              position: "relative",
+              zIndex: 1,
               fontFamily: settings.editorFont || "Georgia, serif",
               fontSize: settings.editorFontSize || 16,
             }}

@@ -247,6 +247,20 @@ html, body {
   font-style: italic;
 }
 
+/* Highlight backdrop — sits behind textarea, mirrors text with coloured marks */
+.highlight-backdrop {
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  user-select: none;
+}
+
+.highlight-backdrop mark {
+  border-radius: 3px;
+  padding: 1px 0;
+  color: transparent;
+}
+
 /* Entity link highlight in editor */
 .entity-link {
   color: var(--accent);
