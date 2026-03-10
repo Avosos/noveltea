@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { Plus, FolderOpen, Clock, BookOpen, Trash2 } from "lucide-react";
+import { Plus, FolderOpen, Clock, BookOpen, Trash2, PenTool } from "lucide-react";
 import { useNovelTeaStore } from "@/stores/noveltea-store";
 import { getTranslations } from "@/lib/i18n";
 
@@ -36,7 +36,9 @@ export default function WelcomeView() {
       <div style={{ width: "100%", maxWidth: 640 }} className="animate-fadeIn">
         {/* Logo + Title */}
         <div style={{ textAlign: "center", marginBottom: 48 }}>
-          <NovelTeaWelcomeLogo />
+          <div style={{ width: 72, height: 72, borderRadius: 14, background: "linear-gradient(135deg, #a3e635, #4ade80)", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto" }}>
+            <PenTool size={36} color="#fff" />
+          </div>
           <h1 style={{ fontSize: 32, fontWeight: 800, color: "var(--text-primary)", marginTop: 20, letterSpacing: -0.5 }}>
             NovelTea
           </h1>
@@ -139,24 +141,4 @@ export default function WelcomeView() {
   );
 }
 
-function NovelTeaWelcomeLogo() {
-  return (
-    <svg width={72} height={72} viewBox="0 0 256 256" style={{ borderRadius: 14, margin: "0 auto", display: "block" }}>
-      <defs>
-        <linearGradient id="nt-w-bg" x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" stopColor="#a3e635" />
-          <stop offset="100%" stopColor="#4ade80" />
-        </linearGradient>
-      </defs>
-      <rect width="256" height="256" rx="48" fill="url(#nt-w-bg)" />
-      <g transform="translate(128,128)" fill="none" stroke="#08080d" strokeWidth="10" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M -40 -50 L -40 50" />
-        <path d="M -40 -50 L 10 50" />
-        <path d="M 10 -50 L 10 50" />
-        <path d="M 30 -20 Q 30 -50, 50 -50 Q 70 -50, 70 -20" />
-        <path d="M 30 -20 L 30 50" />
-        <line x1="-55" y1="60" x2="80" y2="60" strokeWidth="6" opacity="0.4" />
-      </g>
-    </svg>
-  );
-}
+

@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Minus, Square, Copy, X } from "lucide-react";
+import { Minus, Square, Copy, X, PenTool } from "lucide-react";
 import { useNovelTeaStore } from "@/stores/noveltea-store";
 
 export default function Titlebar() {
@@ -38,7 +38,9 @@ export default function Titlebar() {
     >
       {/* Brand */}
       <div style={{ display: "flex", alignItems: "center", gap: 10, paddingLeft: 14 }}>
-        <NovelTeaLogo size={20} />
+        <div style={{ width: 20, height: 20, borderRadius: 4, background: "linear-gradient(135deg, #a3e635, #65a30d)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+          <PenTool size={12} color="#fff" />
+        </div>
         <div style={{ display: "flex", alignItems: "baseline", gap: 6 }}>
           <span style={{ fontSize: 13, fontWeight: 700, color: "var(--text-primary)", letterSpacing: 0.5 }}>
             NOVELTEA
@@ -74,34 +76,7 @@ export default function Titlebar() {
   );
 }
 
-function NovelTeaLogo({ size = 20 }: { size?: number }) {
-  return (
-    <svg width={size} height={size} viewBox="0 0 256 256" style={{ borderRadius: size * 0.19, flexShrink: 0 }}>
-      <defs>
-        <linearGradient id="nt-tb-bg" x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" stopColor="#22c55e" />
-          <stop offset="100%" stopColor="#16a34a" />
-        </linearGradient>
-      </defs>
-      <rect width="256" height="256" rx="48" fill="url(#nt-tb-bg)" />
-      {/* Minimalist fountain pen / feather quill */}
-      <g transform="translate(128,128)" fill="none" stroke="#fff" strokeWidth="8" strokeLinecap="round" strokeLinejoin="round">
-        {/* Quill body - diagonal line */}
-        <line x1="-50" y1="50" x2="50" y2="-60" strokeWidth="10" />
-        {/* Nib / pen tip */}
-        <path d="M -50 50 L -60 65 L -45 55" fill="#fff" stroke="#fff" strokeWidth="4" />
-        {/* Feather barbs left */}
-        <path d="M -20 20 Q -55 5, -65 -30" strokeWidth="6" opacity="0.7" />
-        <path d="M 0 0 Q -40 -15, -55 -50" strokeWidth="6" opacity="0.5" />
-        {/* Feather barbs right */}
-        <path d="M 10 -10 Q 45 -5, 60 -35" strokeWidth="6" opacity="0.7" />
-        <path d="M 30 -30 Q 55 -30, 65 -55" strokeWidth="6" opacity="0.5" />
-        {/* Small ink dot */}
-        <circle cx="-55" cy="60" r="4" fill="#fff" opacity="0.6" stroke="none" />
-      </g>
-    </svg>
-  );
-}
+
 
 function WindowButton({
   children,
