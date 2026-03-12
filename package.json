@@ -6,19 +6,20 @@
   "author": "Avosos",
   "main": "electron/main.js",
   "scripts": {
-    "dev": "concurrently -k \"next dev --port 3300\" \"wait-on http://localhost:3300 && electron .\"",
+    "dev": "next dev --port 3300",
+    "dev:electron": "concurrently --kill-others \"next dev --port 3300\" \"wait-on http://localhost:3300 && cross-env ELECTRON_DEV_URL=http://localhost:3300 electron .\"",
     "build": "next build",
     "start": "electron .",
     "dist": "next build && electron-builder",
     "lint": "next lint"
   },
   "dependencies": {
-    "next": "^15.1.0",
-    "react": "^19.0.0",
-    "react-dom": "^19.0.0",
-    "zustand": "^5.0.0",
-    "lucide-react": "^0.468.0",
-    "uuid": "^11.0.0",
+    "next": "16.1.6",
+    "react": "19.2.4",
+    "react-dom": "19.2.4",
+    "zustand": "^5.0.11",
+    "lucide-react": "^0.577.0",
+    "uuid": "^13.0.0",
     "better-sqlite3": "^11.0.0"
   },
   "devDependencies": {
@@ -28,13 +29,16 @@
     "@types/react": "^19.0.0",
     "@types/react-dom": "^19.0.0",
     "@types/uuid": "^10.0.0",
-    "concurrently": "^9.1.0",
-    "electron": "^33.0.0",
-    "electron-builder": "^25.1.0",
+    "concurrently": "^9.2.1",
+    "cross-env": "^10.1.0",
+    "electron": "^40.6.1",
+    "electron-builder": "^26.8.1",
+    "eslint": "^9",
+    "eslint-config-next": "16.1.6",
     "postcss": "^8.5.0",
     "tailwindcss": "^4.0.0",
     "typescript": "^5.7.0",
-    "wait-on": "^8.0.0"
+    "wait-on": "^9.0.4"
   },
   "build": {
     "appId": "com.avosos.noveltea",
