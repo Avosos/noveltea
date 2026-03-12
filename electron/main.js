@@ -2,10 +2,15 @@ const { app, BrowserWindow, ipcMain, dialog, shell, nativeImage } = require("ele
 const path = require("path");
 const fs = require("fs");
 
+// ─── Centralized storage under avosos ecosystem ─────────────────────────────
+const dataDir = path.join(app.getPath("appData"), "avosos", "apps", "noveltea");
+fs.mkdirSync(dataDir, { recursive: true });
+app.setPath("userData", dataDir);
+
 // ─── Constants ───────────────────────────────────────────────────────────────
 const IS_DEV = !app.isPackaged;
 const DEV_PORT = 3300;
-const DATA_DIR = path.join(app.getPath("userData"), "noveltea");
+const DATA_DIR = app.getPath("userData");
 const SETTINGS_FILE = path.join(DATA_DIR, "settings.json");
 const RECENT_FILE = path.join(DATA_DIR, "recent-projects.json");
 
