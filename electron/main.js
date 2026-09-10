@@ -15,6 +15,16 @@ const SETTINGS_FILE = path.join(DATA_DIR, "settings.json");
 const RECENT_FILE = path.join(DATA_DIR, "recent-projects.json");
 
 let mainWindow = null;
+const handle = ipcMain.handle.bind(ipcMain);
+ipcMain.handle = (channel, handler) => handle(channel, (event, ...args) => {
+  if (!mainWindow || event.sender !== mainWindow.webContents || event.senderFrame !== mainWindow.webContents.mainFrame) throw new Error("Untrusted IPC sender");
+  return handler(event, ...args);
+});
+function openWebLink(value) {
+  const link = new URL(value);
+  if (!["https:", "http:"].includes(link.protocol) || link.username || link.password) throw new Error("Unsupported external link");
+  return shell.openExternal(link.href);
+}
 
 // Set app user model ID for Windows taskbar icon
 if (process.platform === "win32") {
@@ -84,6 +94,9 @@ function createWindow() {
     },
   });
 
+  mainWindow.webContents.setWindowOpenHandler(() => ({ action: "deny" }));
+  mainWindow.webContents.on("will-navigate", (event) => event.preventDefault());
+  mainWindow.webContents.on("will-attach-webview", (event) => event.preventDefault());
   mainWindow.once("ready-to-show", () => mainWindow.show());
 
   mainWindow.on("maximize", () => mainWindow.webContents.send("maximized-change", true));
@@ -388,7 +401,7 @@ ipcMain.handle("dialog:saveFolder", async (_, defaultName) => {
 });
 
 // ─── IPC: Shell ─────────────────────────────────────────────────────────────
-ipcMain.handle("shell:openExternal", (_, url) => shell.openExternal(url));
+ipcMain.handle("shell:openExternal", (_, url) => openWebLink(url));
 ipcMain.handle("shell:openPath", (_, filePath) => shell.openPath(filePath));
 
 // ─── IPC: Search across project files ────────────────────────────────────────

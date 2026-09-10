@@ -88,7 +88,8 @@ export default function EditorView() {
     for (const attr of sceneAttributions) {
       if (!colorMap[attr.characterId]) {
         const ch = entities.find((e) => e.id === attr.characterId) as CharacterEntity | undefined;
-        colorMap[attr.characterId] = ch?.dialogueColor || "#60a5fa";
+        const color = ch?.dialogueColor;
+        colorMap[attr.characterId] = color && /^#[0-9a-f]{6}$/i.test(color) ? color : "#60a5fa";
       }
     }
     // Sort attributions by start offset

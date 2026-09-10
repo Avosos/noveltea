@@ -8,18 +8,18 @@
 
 :root {
   /* ─── Core Palette (same as Avosos ecosystem) ─── */
-  --bg-primary: #08080d;
-  --bg-secondary: #0e0e15;
-  --bg-tertiary: #14141e;
-  --bg-elevated: #1a1a28;
-  --bg-surface: #20202f;
-  --bg-hover: #282840;
-  --bg-card: #12121c;
+  --bg-primary: #151817;
+  --bg-secondary: #1b201c;
+  --bg-tertiary: #222823;
+  --bg-elevated: #2a322c;
+  --bg-surface: #303a32;
+  --bg-hover: #38433a;
+  --bg-card: #1c221e;
 
-  --text-primary: #f0f0f5;
-  --text-secondary: #9898b0;
-  --text-muted: #555570;
-  --text-dim: #3a3a50;
+  --text-primary: #eeeeea;
+  --text-secondary: #b3bbb0;
+  --text-muted: #929d8e;
+  --text-dim: #7e887a;
 
   --border-subtle: rgba(255, 255, 255, 0.04);
   --border-default: rgba(255, 255, 255, 0.08);
@@ -81,7 +81,7 @@
   --bg-hover: #c8c8d2;
   --bg-card: #f0f0f3;
   --text-primary: #1a1a2e;
-  --text-secondary: #555570;
+  --text-secondary: #929d8e;
   --text-muted: #8888a0;
   --text-dim: #aaaabc;
   --border-subtle: rgba(0, 0, 0, 0.04);
@@ -151,7 +151,7 @@ html, body {
 
 .btn-primary {
   background: var(--accent);
-  color: #08080d;
+  color: #151817;
   border: none;
   padding: 8px 18px;
   border-radius: var(--radius-sm);
@@ -297,3 +297,10 @@ html, body {
 .tension-low { color: #4ade80; }
 .tension-med { color: #fbbf24; }
 .tension-high { color: #f87171; }
+
+/* Avosos shared interaction baseline */
+:root { --shadow-glow: none; --accent-gradient: var(--accent); --accent-gradient-subtle: var(--bg-secondary); }
+.glass-panel { backdrop-filter: none; -webkit-backdrop-filter: none; background: var(--bg-secondary); }
+.card { border-radius: 4px; }
+button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+@media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; scroll-behavior: auto !important; } }
